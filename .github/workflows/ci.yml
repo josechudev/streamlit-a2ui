@@ -14,14 +14,25 @@ concurrency:
 
 jobs:
   test:
-    name: Build, test, browser smoke test
+    name: Test (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      # Two legs only: the declared floor, and the newest everything.
+      matrix:
+        include:
+          - name: py3.10 / streamlit floor
+            python: "3.10"
+            streamlit: "streamlit==1.59.*"
+          - name: py3.13 / streamlit latest
+            python: "3.13"
+            streamlit: "streamlit>=1.67"
     env:
-      PYTHON_VERSION: "3.13"
+      PYTHON_VERSION: ${{ matrix.python }}
       # Not STREAMLIT_*: Streamlit reads STREAMLIT_<OPTION> variables as CLI
       # options, so STREAMLIT_VERSION would be parsed as `streamlit --version`.
-      PIN_STREAMLIT: "1.67.*"
+      PIN_STREAMLIT: ${{ matrix.streamlit }}
     steps:
       # Third-party actions are pinned to a commit; the comment names the release.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -56,7 +67,7 @@ jobs:
       - name: "Python: install"
         run: |
           uv venv --python "$PYTHON_VERSION"
-          uv pip install -e . "streamlit==$PIN_STREAMLIT" \
+          uv pip install -e . "$PIN_STREAMLIT" \
             "pytest==9.2.0" "ruff==0.17.5" "pytest-playwright==0.10.0" "playwright==1.65.2"
 
       - name: "Python: lint"
@@ -76,7 +87,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: e2e-results
+          name: e2e-results-py${{ matrix.python }}
           path: e2e-results
           retention-days: 7
           if-no-files-found: ignore

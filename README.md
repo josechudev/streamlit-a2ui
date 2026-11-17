@@ -11,7 +11,7 @@ It is for Python developers who already have an agent that speaks A2UI, or want 
 Pre-release. Not on PyPI.
 
 - A2UI **1.0** only, with the official basic catalog. 0.9.x and 0.8 are not supported.
-- Streamlit >= 1.51 (Components v2). Developed and tested on 1.67.
+- Streamlit >= 1.59 (Components v2). CI runs the floor (1.59) and the latest release; developed on 1.67.
 - Python >= 3.10.
 - Pinned to `@a2ui/react` and `@a2ui/web_core` 0.15.0.
 
