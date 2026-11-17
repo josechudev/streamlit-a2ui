@@ -49,7 +49,9 @@ export function actionMessage(action: ActionPayload): WireMessage {
  * messages; outbound-listener messages (callAgentFunction, ...) are already
  * wire messages and are passed through unchanged.
  */
-export function createProcessor(send: (message: WireMessage) => void): Processor {
+export function createProcessor(
+  send: (message: WireMessage) => void,
+): Processor {
   return new MessageProcessor<ReactCatalogComponent>(
     [basicCatalog],
     (action) => send(actionMessage(action)),
@@ -151,7 +153,9 @@ export class LogSession {
     const notice: Notice = {
       code: String(error.code),
       message: String(error.message),
-      ...(typeof error.surfaceId === "string" && { surfaceId: error.surfaceId }),
+      ...(typeof error.surfaceId === "string" && {
+        surfaceId: error.surfaceId,
+      }),
     };
     this.notices = [...this.notices, notice].slice(-MAX_NOTICES);
     this.noticeCount += 1;
