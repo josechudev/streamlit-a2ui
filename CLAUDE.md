@@ -82,7 +82,7 @@ if event:
 | `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range (`web_core ^0.14.0`) is wrong for 0.15, so `package.json` carries a scoped npm `overrides` entry pointing it at the root `web_core`. Remove when upstream fixes it |
 | `dompurify` (inside `@a2ui/markdown-it`) | `3.4.18`, exact, via a scoped npm `overrides` entry (ADR-008). Upstream pins 3.4.11, which has open advisories fixed by 3.4.17. Remove when upstream ships a fix |
 | `zod` | 3.x required by `web_core`; open high advisory with no 3.x fix. Accepted residual risk (ADR-008) |
-| Streamlit | develop on 1.67.x; declare `streamlit>=1.51` |
+| Streamlit | develop on 1.67.x; declare `streamlit>=1.59`, the lowest release CI passes (M2: 1.51–1.58 fail, see `docs/m2-report.md`) |
 | Node | 24 (via nvm if the system Node is older) |
 | React | 18 or 19 (peer range of `@a2ui/react`); use what the template ships |
 | Basic catalog ID | `https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json` |
@@ -137,7 +137,8 @@ streamlit_a2ui/frontend/   Vite + React + TS; build output is the asset_dir
   scripts/                 build-time: capabilities, license texts, source-map check
 examples/basic_app.py      form surface, action round trip, scripted agent
 examples/streaming_app.py  fragment streaming plus an action from inside the fragment
-tests/                     pytest (default run)
+scripts/compare_wheels.py  compares two wheels by file name and SHA-256 (CI, release)
+tests/                     pytest (default run): API, version single source, built wheel contents
   src/ErrorBoundary.tsx    per-surface React error boundary (the one class component)
 e2e/                       one Playwright browser smoke test (run with `pytest e2e`)
 .github/workflows/ci.yml   CI: version matrix (build, tests, lint, e2e), wheel + sdist, installed-wheel smoke test
@@ -186,27 +187,32 @@ uv pip install pytest-playwright
 .venv/bin/playwright install chromium
 .venv/bin/pytest e2e -q          # starts examples/basic_app.py, clicks Send, checks the round trip
 
-# wheel and sdist (after npm run build)
-uv build                         # dist/*.whl and dist/*.tar.gz
-uvx twine check --strict dist/*
+# wheel and sdist (after npm run build). Build them separately: a bare `uv build`
+# makes the wheel from the sdist, leaving nothing to compare.
+uv build --sdist --out-dir dist
+uv build --wheel --out-dir dist
+uvx twine@7.0.0 check --strict dist/*
+# the sdist must rebuild the same wheel without Node (CI runs this with a PATH that has no node)
+uv build --wheel --out-dir /tmp/from-sdist dist/*.tar.gz
+python3 scripts/compare_wheels.py dist/*.whl /tmp/from-sdist/*.whl
 
-# installed-wheel smoke test: the wheel, not the source tree (after uv build)
-uv venv /tmp/a2ui-wheel
-uv pip install --python /tmp/a2ui-wheel dist/*.whl pytest pytest-playwright
-(cd /tmp && /tmp/a2ui-wheel/bin/python -c "import streamlit_a2ui; print(streamlit_a2ui.renderer_capabilities())")
+# installed-wheel smoke test: the wheel, not the source tree (the e2e server runs from a temp dir)
+uv venv --python 3.13 /tmp/a2ui-wheel
+uv pip install --python /tmp/a2ui-wheel dist/*.whl pytest==9.2.0 pytest-playwright==0.10.0 playwright==1.65.2
+(cd /tmp && /tmp/a2ui-wheel/bin/python -c "import streamlit_a2ui; print(streamlit_a2ui.__file__, streamlit_a2ui.renderer_capabilities())")
 /tmp/a2ui-wheel/bin/playwright install chromium
 /tmp/a2ui-wheel/bin/pytest e2e -q
 
-# version matrix, floor leg (CI runs this and the latest leg; see ci.yml for exact pins)
+# version matrix, floor leg (CI's other leg is Python 3.13 with the latest Streamlit)
 uv venv --python 3.10 .venv-floor
-uv pip install --python .venv-floor -e . "streamlit==1.51.*" pytest ruff pytest-playwright
+uv pip install --python .venv-floor -e . "streamlit==1.59.*" pytest==9.2.0 ruff==0.17.5 pytest-playwright==0.10.0 playwright==1.65.2
 .venv-floor/bin/pytest -q && .venv-floor/bin/pytest e2e -q
 
 # release dry run: builds and checks, never publishes (owner only; needs the branch pushed)
 gh workflow run release.yml --ref <branch>
 ```
 
-CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor, and Python 3.13 with the latest Streamlit. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag; only the owner creates tags.
+CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`), and Python 3.13 with the latest Streamlit (`>=1.67`). A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check`, and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the e2e test against it. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag; only the owner creates tags.
 
 If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
 
@@ -214,6 +220,7 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 
 ## Conventions
 
+- Version: defined once, in the root `pyproject.toml`. The component manifest and `package.json` have none (`tests/test_version.py`).
 - Python: 3.10+, full type hints, `ruff` for lint and format, `pytest`. Public API is exactly what `__init__.py` exports.
 - TypeScript: strict mode, no `any` in our code, function components only, except the one class component `ErrorBoundary` (`getDerivedStateFromError` + `componentDidCatch`, Streamlit's own pattern; React has no hook for it). No `react-error-boundary`. Keep the frontend to a handful of files; it is glue, not an app.
 - Tests: pytest for the Python API and the built wheel's contents; one Playwright smoke test in `e2e/` (keep it to one; it guards against Streamlit breaking Components v2 behaviour); frontend unit tests for the cursor, replay, outbound wrapping and the error boundary. Python never parses message contents, so tests do not either.
