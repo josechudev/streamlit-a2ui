@@ -21,3 +21,7 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 streamlit_a2ui = ["frontend/build/**/*", "pyproject.toml", "renderer_capabilities.json", "THIRD_PARTY_LICENSES.txt"]
+
+[tool.pytest.ini_options]
+# The browser test in e2e/ is run on its own: `pytest e2e`.
+testpaths = ["tests"]
