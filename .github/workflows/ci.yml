@@ -119,8 +119,27 @@ jobs:
         working-directory: streamlit_a2ui/frontend
         run: npm run build
 
-      - name: Build wheel and sdist
-        run: uv build --out-dir dist
+      # Two separate builds: a bare `uv build` makes the wheel from the sdist,
+      # which would leave nothing to compare against.
+      - name: Build sdist and wheel
+        run: |
+          uv build --sdist --out-dir dist
+          uv build --wheel --out-dir dist
+
+      # The sdist ships the prebuilt frontend, so a wheel built from it must
+      # not need Node. Build with a PATH that has uv and the system tools but
+      # no Node, then require the same files and digests as the direct wheel.
+      - name: Build a wheel from the sdist without Node and compare
+        run: |
+          UV_DIR="$(dirname "$(command -v uv)")"
+          env PATH="$UV_DIR:/usr/bin:/bin" bash -euo pipefail -c '
+            if command -v node; then echo "node is still on PATH" >&2; exit 1; fi
+            uv build --wheel --out-dir "$RUNNER_TEMP/from-sdist" dist/*.tar.gz
+          '
+          python3 scripts/compare_wheels.py dist/*.whl "$RUNNER_TEMP"/from-sdist/*.whl
+
+      - name: Check metadata with twine
+        run: uvx twine@7.0.0 check --strict dist/*
 
       - name: Upload dist
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
