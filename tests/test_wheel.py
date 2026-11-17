@@ -63,6 +63,12 @@ def test_wheel_ships_the_generated_capabilities(wheel: zipfile.ZipFile) -> None:
     assert not [n for n in wheel.namelist() if n.startswith(BUILD) and "capabilit" in n]
 
 
+def test_wheel_ships_third_party_licenses(wheel: zipfile.ZipFile) -> None:
+    text = wheel.read("streamlit_a2ui/THIRD_PARTY_LICENSES.txt").decode("utf-8")
+    for package in ("@a2ui/web_core@0.15.0", "dompurify@3.4.18", "react@", "lit@"):
+        assert package in text
+
+
 def test_wheel_has_no_source_maps(wheel: zipfile.ZipFile) -> None:
     assert not [n for n in wheel.namelist() if n.endswith(".map")]
     for name in wheel.namelist():

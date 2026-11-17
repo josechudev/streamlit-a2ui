@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run clean && npm run typecheck && npm run build:frontend:production && npm run check:build && npm run capabilities",
+    "build": "npm run clean && npm run typecheck && npm run build:frontend:production && npm run check:build && npm run capabilities && npm run licenses",
     "build:frontend:production": "cross-env NODE_ENV=production vite build",
     "clean": "rimraf build",
     "dev": "cross-env NODE_ENV=development vite build --watch",
@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "capabilities": "node scripts/generate-capabilities.ts",
     "check:build": "node scripts/check-build.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "licenses": "node scripts/third-party-licenses.ts"
   },
   "prettier": {},
   "dependencies": {
