@@ -25,7 +25,7 @@ export default defineConfig(() => {
       sourcemap: isDev,
       lib: {
         entry: "./src/index.tsx",
-        name: "MyComponent",
+        name: "A2uiSurface",
         formats: ["es"],
         fileName: "index-[hash]",
       },
@@ -34,7 +34,8 @@ export default defineConfig(() => {
           output: {
             minify: {
               compress: {
-                dropConsole: true,
+                // Keep console.info: M0 logs MessageProcessor construction.
+                dropConsole: false,
                 dropDebugger: true,
               },
             },

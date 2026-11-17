@@ -1,52 +1,52 @@
+"""Render A2UI 1.0 surfaces inside Streamlit apps."""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import Any
+
 import streamlit as st
 
-out = st.components.v2.component(
-    "streamlit-a2ui.streamlit_a2ui",
+__all__ = ["a2ui_surface"]
+
+_component = st.components.v2.component(
+    "streamlit-a2ui.a2ui_surface",
     js="index-*.js",
-    html='<div class="react-root"></div>',
+    css="index-*.css",
+    html='<div class="a2ui-host"></div>',
+    isolate_styles=True,
 )
 
 
-def on_num_clicks_change():
-    """Callback function for when the number of clicks changes in the frontend."""
-    pass
+def _ignore() -> None:
+    """Trigger callback. The value is read from the return value instead."""
 
 
-# Create a wrapper function for the component.
-#
-# This is an optional best practice. We could simply expose the component
-# function returned by `st.components.v2.component` and call it done.
-#
-# The wrapper allows us to customize our component's API: we can pre-process its
-# input args, post-process its output value, and add a docstring for users.
-def streamlit_a2ui(name, key=None):
-    """Create a new instance of "streamlit_a2ui".
+def a2ui_surface(
+    messages: Sequence[dict[str, Any]], *, key: str
+) -> dict[str, Any] | None:
+    """Render an A2UI message log and return at most one renderer message.
 
     Parameters
     ----------
-    name: str
-        The name of the thing we're saying hello to. The component will display
-        the text "Hello, {name}!"
-    key: str or None
-        An optional key that uniquely identifies this component.
+    messages
+        The full, append-only log of agent-to-renderer A2UI 1.0 messages.
+        Pass the whole log on every call; the frontend processes only the
+        entries it has not seen yet.
+    key
+        Stable key for this surface instance. The frontend keeps its message
+        processor for as long as the key stays mounted.
 
     Returns
     -------
-    Component state. ``num_clicks`` is the number of button clicks, sent from
-    the frontend with ``setStateValue("num_clicks", ...)``.
-
+    dict or None
+        The renderer-to-agent message produced since the last rerun (for
+        example ``{"version": "1.0", "action": {...}}``), or ``None``.
     """
-    # `data` is sent to the frontend on every run.
-    # `default` initializes state keys that are not set yet. Each key needs a
-    # matching `on_<key>_change` callback, or Streamlit rejects the mount.
-    component_value = out(
-        name=name,
+    result = _component(
         key=key,
-        default={"num_clicks": 0},
-        data={"name": name},
-        on_num_clicks_change=on_num_clicks_change,
+        data={"messages": list(messages)},
+        on_renderer_message_change=_ignore,
     )
-
-    # We could modify the value returned from the component if we wanted.
-    # There's no need to do this in our simple example - but it's an option.
-    return component_value
+    value = result.get("renderer_message")
+    return value if isinstance(value, dict) else None
