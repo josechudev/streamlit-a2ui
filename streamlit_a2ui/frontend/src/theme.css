@@ -38,12 +38,30 @@
   --a2ui-textfield-color-border-focus: var(--st-primary-color);
 }
 
-.a2ui-waiting,
-.a2ui-surface:empty::before {
+.a2ui-waiting {
   color: var(--st-gray-text-color);
   font-style: italic;
 }
 
-.a2ui-surface:empty::before {
-  content: "Waiting for the surface root…";
+/* Processing and surface errors (ADR-009). Text only, set by React. */
+.a2ui-notice {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--st-red-color);
+  border-radius: var(--st-base-radius);
+  background: var(--st-red-background-color);
+  color: var(--st-text-color);
+  font-family: var(--st-code-font);
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.a2ui-notice-title {
+  font-weight: 600;
+}
+
+.a2ui-notice ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
 }
