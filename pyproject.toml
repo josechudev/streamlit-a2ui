@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "streamlit-a2ui"
 version = "0.0.1"
-description = "Streamlit component that allows you to do X"
+description = "Render A2UI 1.0 agent-generated user interfaces inside Streamlit apps"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
