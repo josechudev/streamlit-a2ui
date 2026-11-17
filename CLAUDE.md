@@ -76,7 +76,12 @@ API notes that are easy to get wrong:
 - `web_core` injects a stylesheet onto the host document. Known, accepted, do not try to patch it out.
 - The catalog derives colors with `light-dark()` and Streamlit exposes no color-scheme variable, so `theme.css` must redefine every derived `--a2ui-*` color token from `--st-*`, not only the base ones.
 - Since 0.15.0 a surface renders nothing until its root component arrives. Render our own minimal waiting state.
-- Basic catalog components are custom elements registered globally on the page. Guard against double registration; never load two versions of the bundle.
+- Basic catalog components are custom elements registered globally on the page. `web_core` registration is idempotent for one bundle but throws for a second copy, so `index.tsx` claims the page with a global symbol and a later copy renders a notice instead. Never load two versions of the bundle.
+- Surface errors are re-emitted on `processor.model.onError`. Subscribe there only, or each error is reported twice.
+- `@a2ui/web_core` 0.15.0 does not reject unknown component types; a `Text` without `text` is a reliable invalid message for tests.
+- The production build sets `dropConsole: true` (template default). The one `console.warn` we keep goes through a reference bound in `session.ts`, which the minifier leaves alone.
+- The component is registered on first call, not at import: Streamlit resolves `asset_dir` only once its runtime has started, so import-time registration breaks `import streamlit_a2ui` outside `streamlit run`.
+- A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/notes-m1.md`).
 - The published README still shows v0.9 examples. Trust `node_modules/@a2ui/*/` type definitions and CHANGELOG over blog posts or memory; these packages had breaking changes in 0.13, 0.14 and 0.15.
 - 1.0 wire format differs from 0.9: dynamic values use `@path`, `@call`, `@index`; naming is renderer/agent. The envelope is `{"version":"1.0","createSurface":{...}}`. Take sample payloads from the 1.0 spec (`node_modules/@a2ui/web_core/src/v1_0/schemas/`, including `catalogs/basic/examples/`), not from older tutorials.
 
@@ -104,10 +109,17 @@ Expected shape after generation (adjust to what the template actually produces):
 ```
 streamlit_a2ui/            Python package: __init__.py with a2ui_surface(), renderer_capabilities()
 streamlit_a2ui/frontend/   Vite + React + TS; build output is the asset_dir
+  src/index.tsx            Streamlit glue: one LogSession and React root per mounted instance
+  src/session.ts           LogSession: processor, cursor, replay, error notices; outbound wrapping
+  src/Surfaces.tsx         surfaces, waiting state, error notice
+  src/theme.css            --st-* → --a2ui-* mapping, notice styles
+  scripts/                 build-time: capabilities, license texts, source-map check
 examples/basic_app.py      form surface, action round trip, scripted agent
 examples/streaming_app.py  fragment streaming plus an action from inside the fragment
 tests/                     pytest
 docs/adr/                  NNNN-title.md
+docs/security.md           security model, overrides, residual risks, npm audit
+docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
 docs/spike-report.md       written at the end of M0
 docs/m1-report.md          written at the end of M1
 ```
@@ -119,23 +131,28 @@ Prerequisites: uv, Node 24 (via nvm if the system Node is older), npm. Package o
 ```
 # frontend (from streamlit_a2ui/frontend)
 npm install
-npm run build        # clean + tsc --noEmit + vite build → build/ (the asset_dir)
+npm run build        # clean + tsc + vite build → build/ (the asset_dir), fail on source maps,
+                     # then write ../renderer_capabilities.json and ../THIRD_PARTY_LICENSES.txt
 npm run dev          # vite build --watch; emits source maps into build/
 npm run typecheck
+npm test             # Vitest unit tests (src/*.test.ts)
 
 # python (from repo root)
 uv venv
 uv pip install -e . --force-reinstall
 uv pip install pytest ruff
-.venv/bin/streamlit run examples/spike_app.py
-.venv/bin/pytest -q
+.venv/bin/streamlit run examples/basic_app.py
+.venv/bin/streamlit run examples/streaming_app.py
+.venv/bin/pytest -q            # needs npm run build first: builds and inspects the wheel
 .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
 # wheel
 uv build
 ```
 
-If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild.
+If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
+
+`renderer_capabilities.json` and `THIRD_PARTY_LICENSES.txt` are generated, git-ignored and shipped in the wheel. Never hand-edit them.
 
 ## Conventions
 
