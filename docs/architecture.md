@@ -1,6 +1,6 @@
 # streamlit-a2ui — Architecture v0.2
 
-Status: 2026-11-16. M0 spike complete: criteria 1, 2, 3, 5 pass; 4 fails as designed and passes with the fragment fallback (ADR-007). ADR-001 to 004 are confirmed. ADR-008 and ADR-009 accepted by owner 2026-11-17. Next: M1, harden the spike into v0.1 (`handoff-m1.md`).
+Status: 2026-11-16. M0 spike complete: criteria 1, 2, 3, 5 pass; 4 fails as designed and passes with the fragment fallback (ADR-007). ADR-001 to 004 are confirmed. ADR-008 and ADR-009 accepted by owner 2026-11-17. Next: M1, harden the spike into v0.1 (`docs/handoff-m1.md`).
 Evidence for every factual claim is in `findings.md`. Working instructions for Claude Code are in `CLAUDE.md`.
 
 ## 1. Corrections to the project brief
