@@ -55,8 +55,10 @@ def wheel(tmp_path_factory: pytest.TempPathFactory) -> Iterator[zipfile.ZipFile]
 
 def test_wheel_ships_the_frontend_bundle(wheel: zipfile.ZipFile) -> None:
     names = wheel.namelist()
-    assert [n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.js", n)]
-    assert [n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.css", n)]
+    # Exactly one of each: the component's js=/css= globs fail on two matches,
+    # which a stale setuptools build/ directory in the checkout can cause.
+    assert len([n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.js", n)]) == 1
+    assert len([n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.css", n)]) == 1
     assert "streamlit_a2ui/pyproject.toml" in names
 
 
