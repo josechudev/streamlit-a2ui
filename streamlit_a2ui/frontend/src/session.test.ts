@@ -127,6 +127,23 @@ describe("LogSession", () => {
     ]);
   });
 
+  it("keeps the last five notices, counts all, and clears them on replay", async () => {
+    const { session } = trackedSession();
+    const bad = Array.from({ length: 7 }, (_, i) => ({
+      version: "9.9",
+      createSurface: { surfaceId: `bad-${i}` },
+    }));
+
+    session.sync(bad);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(session.getSnapshot().noticeCount).toBe(7);
+    expect(session.getSnapshot().notices).toHaveLength(5);
+
+    session.sync(login);
+    expect(session.getSnapshot().noticeCount).toBe(0);
+    expect(session.getSnapshot().notices).toEqual([]);
+  });
+
   it("waits until a surface has its root component", () => {
     const { session } = trackedSession();
     session.sync(login.slice(0, 1));
