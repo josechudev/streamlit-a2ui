@@ -16,7 +16,7 @@ Push or open a pull request only when the owner asks. Work on a branch cut from 
 
 M3 publishes the first release candidate and checks the package against a real agent. It passes when all eight hold:
 
-1. The four upstream issues are filed by the owner, or the report says why one was not. Their URLs are in `docs/upstream-issues.md` and linked from `docs/security.md` and ADR-008 (issues 1 and 2), from `docs/security.md` (issue 3) and from the README (issue 4).
+1. Upstream reports, as rechecked on 2026-11-17 (`docs/upstream-issues.md`): issues 2 and 3 are filed by the owner; issue 1 is the existing [#4059](https://github.com/a2ui-project/a2ui/issues/4059), which the owner comments on instead; issue 4 is not filed, and the report records whether the package now passes a `validationConfig` that rejects unknown component types. The URLs are in `docs/upstream-issues.md` and linked from `docs/security.md` and ADR-008 (issues 1 and 2) and from `docs/security.md` (issue 3).
 2. A minimal ADK agent built with `a2ui-agent-sdk`, outside this repository, received `renderer_capabilities()` and drove a surface rendered by `a2ui_surface` in a browser through one action round trip and one streamed response. The report lists the versions used and what broke. Each package bug found is fixed with a test. No adapter or agent dependency was added to the package.
 3. The report records whether a second renderer-to-agent message replaced the first before a rerun, with the steps used. The behaviour is unchanged, and the README states the measured result.
 4. The README says how to install from PyPI, states the pre-1.0 status, shows a GIF of the basic example, and renders correctly on PyPI with working absolute links. The GIF is in neither the wheel nor the sdist.

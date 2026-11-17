@@ -41,11 +41,11 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
    - `docs/release-plan.md`: M2 done; the repository went public in M3; M4 no longer flips visibility.
    - `CONTRIBUTING.md`: the one-time setup is done; add the rulesets and how to re-tag after a failed run that uploaded nothing.
    - `docs/security.md`: status line (M3, repository public).
-2. **Upstream issues.** The owner files them from `docs/upstream-issues.md`.
-   - Before filing, if the owner asks: recheck each draft against the latest published `@a2ui/*` versions and the existing issues on `a2ui-project/a2ui`, and update the drafts.
+2. **Upstream issues.** The owner files them from `docs/upstream-issues.md`. The drafts were rechecked on 2026-11-17: issue 1 already exists upstream (#4059), and issue 4 is mostly a configuration gap on our side.
    - Once the owner gives the URLs, record them in the table in `docs/upstream-issues.md`.
    - Link issues 1 and 2 from `docs/security.md` (the overrides table) and from ADR-008.
-   - Link issue 3 from residual risk 5 in `docs/security.md`, and issue 4 from the README's Limitations.
+   - Link issue 3 from residual risk 5 in `docs/security.md`.
+   - Issue 4 is not filed (see the recheck in `docs/upstream-issues.md`). Instead, consider passing `{ ...RELAXED_VALIDATION, allowUnknownElements: false }` to the `MessageProcessor` in `session.ts` as a package fix during step 3, with a test, and update the README limitation and the `CLAUDE.md` note that `web_core` does not reject unknown types.
    - `package.json` cannot carry comments, so the overrides are not annotated there.
 3. **Real-agent check, outside the repository.**
    - Work in a scratch folder outside this repository and outside any worktree, for example `~/code/a2ui-adk-scratch`. It is not committed anywhere.
@@ -107,7 +107,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
 
 ## Acceptance criteria
 
-1. The four upstream issues are filed by the owner, or the report says why one was not. Their URLs are in `docs/upstream-issues.md` and linked from `docs/security.md` and ADR-008 (issues 1 and 2), from `docs/security.md` (issue 3) and from the README (issue 4).
+1. Upstream reports, as rechecked on 2026-11-17 (`docs/upstream-issues.md`): issues 2 and 3 are filed by the owner; issue 1 is the existing [#4059](https://github.com/a2ui-project/a2ui/issues/4059), which the owner comments on instead; issue 4 is not filed, and the report records whether the package now passes a `validationConfig` that rejects unknown component types. The URLs are in `docs/upstream-issues.md` and linked from `docs/security.md` and ADR-008 (issues 1 and 2) and from `docs/security.md` (issue 3).
 2. A minimal ADK agent built with `a2ui-agent-sdk`, outside this repository, received `renderer_capabilities()` and drove a surface rendered by `a2ui_surface` in a browser through one action round trip and one streamed response. The report lists the versions used and what broke. Each package bug found is fixed with a test. No adapter or agent dependency was added to the package.
 3. The report records whether a second renderer-to-agent message replaced the first before a rerun, with the steps used. The behaviour is unchanged, and the README states the measured result.
 4. The README says how to install from PyPI, states the pre-1.0 status, shows a GIF of the basic example, and renders correctly on PyPI with working absolute links. The GIF is in neither the wheel nor the sdist.
