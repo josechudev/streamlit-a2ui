@@ -4,11 +4,11 @@ Open-source Python package that renders Google's A2UI protocol inside Streamlit 
 
 Personal open-source project. Never add employer code, names, hostnames or data. License: Apache-2.0.
 
-## Current milestone: M2 — release engineering (handoff pending)
+## Current milestone: M2 — release engineering
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`; handoff `docs/handoff-m1.md`). M2's CI workflow and Playwright smoke test were added early at the owner's request; the rest of M2 waits for the owner's M2 handoff. Do not start other M2 work before it exists. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`; handoff `docs/handoff-m1.md`). M2's CI workflow and Playwright smoke test were added early at the owner's request (PR #3, merged). The rest of M2 is defined in `docs/handoff-m2.md`; work on branch `m2-release`, and start with its step 1. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
 Push or open a pull request only when the owner asks. Never publish.
 

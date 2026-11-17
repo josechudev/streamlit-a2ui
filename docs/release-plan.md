@@ -1,6 +1,6 @@
 # streamlit-a2ui — Release plan to 0.1.0
 
-Status: 2026-11-17. M1 merged to `master` (`docs/m1-report.md`). M2 started early with the CI workflow and the browser smoke test; the M2 handoff is still to write.
+Status: 2026-11-17. M1 merged to `master` (`docs/m1-report.md`). M2 started early with the CI workflow and the browser smoke test; the rest of M2 is in `docs/handoff-m2.md`.
 Goal: `pip install streamlit-a2ui` works for a stranger, and the right people know it exists. Nothing else.
 
 Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0.15.0 and `@a2ui/markdown-it` still 0.2.2 (no 1.0-aligned release yet).
@@ -20,7 +20,7 @@ Estimated effort with the owner's evenings: M2 one or two sessions; M3 one sessi
 Defined in `handoff-m1.md`. Exit gate is the owner's review, including reading the frontend diff: it is the part most likely to hide spike-era shortcuts.
 
 ### M2 — Release engineering
-Handoff to write after M1 is merged.
+Handoff: `docs/handoff-m2.md`. Branch: `m2-release`.
 
 - **CI (GitHub Actions):** *started early: `.github/workflows/ci.yml`, one job (Python 3.13, Streamlit 1.67, plus the browser smoke test). The version matrix, the sdist and the clean-venv wheel install below are still to do.* ruff, TypeScript strict, frontend tests, pytest; build frontend then wheel and sdist; wheel-content guard (no `*.map`, no CDN URLs, bundle and capabilities JSON present); install the built wheel in a fresh venv and import it.
 - **Version matrix, kept small:** Python 3.10 and latest; Streamlit at the declared floor and latest. The floor `>=1.51` has never been run. CI either proves it or raises it. Raising the floor is fine; claiming one we haven't tested is not.
