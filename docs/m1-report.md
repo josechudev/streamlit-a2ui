@@ -119,4 +119,4 @@ These are proposals, not work done.
 | 6 | `docs/architecture.md` | Refresh it as part of the M2 handoff |
 | 1 | Upstream reports | Owner files them; drafts in `docs/upstream-issues.md` |
 | — | `THIRD_PARTY_LICENSES.txt` | Keep it in the wheel |
-| — | Merge to `master` | After the owner has reviewed the frontend diff |
+| — | Merge to `master` | Merged 2026-11-17 after the owner's review |

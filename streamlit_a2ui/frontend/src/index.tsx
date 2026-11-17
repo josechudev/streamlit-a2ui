@@ -73,8 +73,9 @@ const A2uiSurfaceRoot: FrontendRenderer<StateShape, DataShape> = ({
     );
     instance = { root, session, setTrigger: setTriggerValue };
     instances.set(parentElement, instance);
+  } else {
+    instance.setTrigger = setTriggerValue;
   }
-  instance.setTrigger = setTriggerValue;
   instance.session.sync(data?.messages ?? []);
 
   return () => {

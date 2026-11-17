@@ -40,11 +40,14 @@ def wheel(tmp_path_factory: pytest.TempPathFactory) -> Iterator[zipfile.ZipFile]
     if uv is None:
         pytest.fail("uv is required to build the wheel")
     out = tmp_path_factory.mktemp("dist")
-    subprocess.run(
+    build = subprocess.run(
         [uv, "build", "--wheel", "--out-dir", str(out), str(ROOT)],
-        check=True,
+        check=False,
         capture_output=True,
+        text=True,
     )
+    if build.returncode != 0:
+        pytest.fail(f"uv build failed:\n{build.stderr[-4000:]}")
     (path,) = out.glob("*.whl")
     with zipfile.ZipFile(path) as archive:
         yield archive

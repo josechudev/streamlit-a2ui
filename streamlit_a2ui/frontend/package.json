@@ -9,6 +9,7 @@
     "clean": "rimraf build",
     "dev": "cross-env NODE_ENV=development vite build --watch",
     "format": "prettier --write src/**/*.{ts,tsx} scripts/*.ts vite.config.ts",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"scripts/*.ts\" vite.config.ts",
     "typecheck": "tsc --noEmit",
     "capabilities": "node scripts/generate-capabilities.ts",
     "check:build": "node scripts/check-build.ts",

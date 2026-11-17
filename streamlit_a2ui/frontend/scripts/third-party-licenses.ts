@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 type LockEntry = { version?: string; license?: string; dev?: boolean };
 type Lock = { packages: Record<string, LockEntry> };
 
+const NODE_MODULES = "node_modules/";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const target = fileURLToPath(
   new URL("../../THIRD_PARTY_LICENSES.txt", import.meta.url),
@@ -20,13 +21,12 @@ const lock = JSON.parse(
 
 const sections: string[] = [];
 const paths = Object.keys(lock.packages)
-  .filter(
-    (path) => path.startsWith("node_modules/") && !lock.packages[path].dev,
-  )
+  .filter((path) => path.startsWith(NODE_MODULES) && !lock.packages[path].dev)
   .sort();
 for (const path of paths) {
   const entry = lock.packages[path];
-  const name = path.slice(path.lastIndexOf("node_modules/") + 13);
+  // Nested installs look like node_modules/a/node_modules/b: keep "b".
+  const name = path.slice(path.lastIndexOf(NODE_MODULES) + NODE_MODULES.length);
   const dir = join(root, path);
   const files = existsSync(dir)
     ? readdirSync(dir).filter((file) => /^(licen[cs]e|copying)/i.test(file))

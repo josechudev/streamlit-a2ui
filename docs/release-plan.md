@@ -1,6 +1,6 @@
 # streamlit-a2ui — Release plan to 0.1.0
 
-Status: 2026-11-17. M1 (harden the spike into v0.1) is complete on branch `m1-v0.1` and awaiting owner review (`docs/m1-report.md`).
+Status: 2026-11-17. M1 merged to `master` (`docs/m1-report.md`). M2 started early with the CI workflow and the browser smoke test; the M2 handoff is still to write.
 Goal: `pip install streamlit-a2ui` works for a stranger, and the right people know it exists. Nothing else.
 
 Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0.15.0 and `@a2ui/markdown-it` still 0.2.2 (no 1.0-aligned release yet).
@@ -16,21 +16,21 @@ Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0
 
 Estimated effort with the owner's evenings: M2 one or two sessions; M3 one session plus fixes; M4 an hour plus waiting for listing PRs.
 
-### M1 — Harden the spike (awaiting review)
+### M1 — Harden the spike (done, merged 2026-11-17)
 Defined in `handoff-m1.md`. Exit gate is the owner's review, including reading the frontend diff: it is the part most likely to hide spike-era shortcuts.
 
 ### M2 — Release engineering
 Handoff to write after M1 is merged.
 
-- **CI (GitHub Actions):** ruff, TypeScript strict, frontend tests, pytest; build frontend then wheel and sdist; wheel-content guard (no `*.map`, no CDN URLs, bundle and capabilities JSON present); install the built wheel in a fresh venv and import it.
+- **CI (GitHub Actions):** *started early: `.github/workflows/ci.yml`, one job (Python 3.13, Streamlit 1.67, plus the browser smoke test). The version matrix, the sdist and the clean-venv wheel install below are still to do.* ruff, TypeScript strict, frontend tests, pytest; build frontend then wheel and sdist; wheel-content guard (no `*.map`, no CDN URLs, bundle and capabilities JSON present); install the built wheel in a fresh venv and import it.
 - **Version matrix, kept small:** Python 3.10 and latest; Streamlit at the declared floor and latest. The floor `>=1.51` has never been run. CI either proves it or raises it. Raising the floor is fine; claiming one we haven't tested is not.
-- **Browser smoke test:** one Playwright test that starts `examples/basic_app.py`, clicks the button, and asserts the returned action appears. Only one; this is the guard against a Streamlit release silently breaking CCv2 behaviour we depend on.
+- **Browser smoke test:** *done (`e2e/test_basic_app.py`).* one Playwright test that starts `examples/basic_app.py`, clicks the button, and asserts the returned action appears. Only one; this is the guard against a Streamlit release silently breaking CCv2 behaviour we depend on.
 - **Packaging metadata:** single-sourced version, classifiers, project URLs, `LICENSE` and the generated `THIRD_PARTY_LICENSES.txt` in the wheel (no `NOTICE`: no bundled dependency ships one, see `docs/m1-report.md`), sdist that can rebuild the frontend (or a documented decision that it can't).
 - **Release workflow:** tag `v*` → build in CI → publish with PyPI Trusted Publishing (OIDC, no API token stored). Configure the publisher as "pending" on PyPI so the first upload claims the name.
 - **Repo hygiene, minimal:** `CHANGELOG.md`, short `CONTRIBUTING.md` (how to build, the out-of-scope list), `SECURITY.md` pointing to `docs/security.md` with a private reporting route, Dependabot for npm and pip with `@a2ui/*` excluded from auto-bumps (pins are deliberate).
 - **Error boundary (owner decision after M1):** follow Streamlit's own pattern, one small class `ErrorBoundary` around each surface, so an exception while React renders one surface shows a plain-text notice (and the bound `console.warn`) instead of blanking the whole component. Needs a one-line exception to the "function components only" convention in `CLAUDE.md`. Add a Vitest or Playwright check that a throwing surface leaves the others rendered.
 - **Bundle whitespace:** try `codegen.removeWhitespace` in the Vite build. Record raw and gzip size before and after; keep it only if the bundle still passes every test and the browser smoke test.
-- **The M2 handoff must also:** refresh `docs/architecture.md` (it still describes the end of M0; fold in M1's findings and the ADRs); lift the `CLAUDE.md` out-of-scope bans that M2 and M3 need (CI workflows, publishing to PyPI); keep every other ban.
+- **The M2 handoff must also:** refresh `docs/architecture.md` (it still describes the end of M0; fold in M1's findings and the ADRs); lift the `CLAUDE.md` out-of-scope ban that M3 needs (publishing to PyPI; the CI ban was lifted with the CI workflow); keep every other ban.
 
 Not in M2: docs site, coverage badges, multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish.
 

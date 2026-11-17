@@ -192,7 +192,7 @@ The component runs in your app's page with no iframe. Read [docs/security.md](do
 
 ## Development
 
-The commands to build, test and lint are in [CLAUDE.md](CLAUDE.md). Design decisions are in [docs/adr/](docs/adr/).
+The commands to build, test and lint are in [CLAUDE.md](CLAUDE.md), and [docs/testing-playbook.md](docs/testing-playbook.md) has the manual checks. CI runs the build, the unit tests, pytest, ruff and one Playwright browser test on every pull request. Design decisions are in [docs/adr/](docs/adr/).
 
 ## License
 
