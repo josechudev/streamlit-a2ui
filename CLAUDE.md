@@ -99,7 +99,28 @@ docs/spike-report.md       written at the end of M0
 
 Prerequisites: uv, Node 24, npm.
 
-_To be filled in from the generated template during M0 (frontend dev/build, editable install, run example, tests)._
+Confirmed during M0 (2026-11-16). The system `node` may not be 24; this machine uses `~/.nvm/versions/node/v24.15.0/bin` first on `PATH`.
+
+```
+# frontend (from streamlit_a2ui/frontend)
+npm install
+npm run build        # clean + tsc --noEmit + vite build → build/ (the asset_dir)
+npm run dev          # vite build --watch; emits source maps into build/ — never ship that output
+npm run typecheck
+
+# python (from repo root)
+uv venv
+uv pip install -e . --force-reinstall
+uv pip install pytest ruff
+.venv/bin/streamlit run examples/spike_app.py
+.venv/bin/pytest -q
+.venv/bin/ruff check . && .venv/bin/ruff format --check .
+
+# wheel
+uv build
+```
+
+If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild.
 
 ## Conventions
 
