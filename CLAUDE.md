@@ -4,15 +4,19 @@ Open-source Python package that renders Google's A2UI protocol inside Streamlit 
 
 Personal open-source project. Never add employer code, names, hostnames or data. License: Apache-2.0.
 
-## Current milestone: M1 — harden the spike into v0.1
+## Current milestone: M2 — release engineering (handoff pending)
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete on branch `m0-spike` (`docs/spike-report.md`). M1 complete on branch `m1-v0.1`, awaiting owner review (`docs/m1-report.md`); the owner's handoff is `docs/handoff-m1.md`. Do not start new work until the owner has reviewed it. Exception, at the owner's request: M2's CI workflow and Playwright smoke test were started early on branch `m2-ci`, stacked on `m1-v0.1`. Where the handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`; handoff `docs/handoff-m1.md`). M2's CI workflow and Playwright smoke test were added early at the owner's request; the rest of M2 waits for the owner's M2 handoff. Do not start other M2 work before it exists. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
-M1 makes the spike something a stranger can install from source and use. It is not a feature milestone. Do not push, open a PR, or publish.
+Push or open a pull request only when the owner asks. Never publish.
 
-M1 passes when all nine hold:
+### M1 — harden the spike into v0.1 (done)
+
+M1 made the spike something a stranger can install from source and use. It was not a feature milestone.
+
+M1 passed when all nine held:
 
 1. From a clean clone, the commands in the Commands section build the frontend, install the package and run both examples without edits.
 2. `examples/basic_app.py`: the surface renders, the action comes back once with its context, the scripted reply updates the surface in place, and typed-but-unsubmitted text survives the rerun.
@@ -24,7 +28,7 @@ M1 passes when all nine hold:
 8. All tests and linters pass. Criteria 2, 3 and 4 were exercised in a browser, not inferred from code; otherwise they are marked "needs owner verification" with a click-through checklist.
 9. `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/0001`–`0009`, `docs/notes-m1.md` and `docs/m1-report.md` exist and agree with each other.
 
-When M1 is done, write `docs/m1-report.md` (each criterion with how it was checked, what the step-4 review changed, final dependency versions and `npm audit` output, bundle size before and after, anything in the handoff or this file that was wrong, open problems), then stop and wait for review.
+The result, and the owner's decisions on it, are in `docs/m1-report.md`.
 
 ## Architecture (decided; change only via an ADR)
 
@@ -179,6 +183,6 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 
 ## Out of scope — refuse or ask first
 
-Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing to PyPI or npm · pushing to a remote.
+Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing to PyPI or npm · pushing or opening a pull request unless the owner asks.
 
 If a task seems to need one of these, stop and say so instead of building it.

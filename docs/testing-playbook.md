@@ -94,10 +94,10 @@ Stop the first app (Ctrl+C), then:
 
 ## 6. Clean clone (criterion 1, about 10 minutes)
 
-Proves the README's commands work with nothing left over from your checkout.
+Proves the README's commands work with nothing left over from your checkout. `git clone .` checks out the branch you are on; commit first, because uncommitted changes are not cloned.
 
 ```bash
-git clone -b m1-v0.1 . /tmp/a2ui-clean
+git clone . /tmp/a2ui-clean
 ```
 
 Then run parts 0 and 1 inside `/tmp/a2ui-clean`, and start each example once (B1 and S1). Delete the folder afterwards.
@@ -105,7 +105,7 @@ Then run parts 0 and 1 inside `/tmp/a2ui-clean`, and start each example once (B1
 ## Not covered by this playbook
 
 - A real agent. Every payload is scripted; M3 adds a Google ADK check.
-- The declared Streamlit floor (`>=1.51`); only 1.67 has been run. M2's CI covers it.
+- The declared Streamlit floor (`>=1.51`); only 1.67 has been run, locally and in CI. M2's version matrix will cover it.
 - Windows, Linux, and classic (non-overlay) scrollbars.
 - An exception thrown while React renders a surface: it would blank the component. The error boundary is planned for M2.
 
