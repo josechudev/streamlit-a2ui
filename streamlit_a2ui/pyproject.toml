@@ -1,7 +1,8 @@
 # Ship a minimal metadata file that can be picked up by Streamlit at runtime.
+# No `version` here: Streamlit falls back to the installed distribution's version
+# (the root pyproject.toml is the single source; tests/test_version.py checks).
 [project]
 name = "streamlit-a2ui"
-version = "0.0.1"
 
 [[tool.streamlit.component.components]]
 name = "a2ui_surface"
