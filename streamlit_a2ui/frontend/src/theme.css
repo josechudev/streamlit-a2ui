@@ -1,0 +1,49 @@
+/*
+ * Map Streamlit theme variables (--st-*) onto A2UI basic-catalog tokens
+ * (--a2ui-*). The catalog's defaults live on :root and derive several colors
+ * with light-dark(); Streamlit exposes no color-scheme variable, so every
+ * derived token is redeclared here from --st-* values with color-mix().
+ */
+.a2ui-host {
+  font-family: var(--st-font);
+  color: var(--st-text-color);
+
+  --a2ui-color-background: var(--st-background-color);
+  --a2ui-color-on-background: var(--st-text-color);
+  --a2ui-color-surface: var(--st-secondary-background-color);
+  --a2ui-color-on-surface: var(--st-text-color);
+
+  --a2ui-color-primary: var(--st-primary-color);
+  --a2ui-color-primary-light: color-mix(in oklab, var(--st-primary-color) 85%, white);
+  --a2ui-color-primary-dark: color-mix(in oklab, var(--st-primary-color) 85%, black);
+  --a2ui-color-primary-hover: color-mix(in oklab, var(--st-primary-color) 85%, var(--st-text-color));
+  --a2ui-color-on-primary: #fff;
+
+  --a2ui-color-secondary: var(--st-secondary-background-color);
+  --a2ui-color-secondary-light: color-mix(in oklab, var(--st-secondary-background-color) 85%, white);
+  --a2ui-color-secondary-dark: color-mix(in oklab, var(--st-secondary-background-color) 95%, black);
+  --a2ui-color-secondary-hover: color-mix(in oklab, var(--st-secondary-background-color) 85%, var(--st-text-color));
+  --a2ui-color-on-secondary: var(--st-text-color);
+
+  --a2ui-color-border: var(--st-border-color);
+  --a2ui-border: var(--a2ui-border-width, 1px) solid var(--st-border-color);
+  --a2ui-border-radius: var(--st-base-radius);
+  --a2ui-color-input: var(--st-secondary-background-color);
+  --a2ui-color-on-input: var(--st-text-color);
+
+  --a2ui-font-family-title: var(--st-heading-font);
+  --a2ui-font-family-monospace: var(--st-code-font);
+  --a2ui-text-caption-color: var(--st-gray-text-color);
+  --a2ui-text-a-color: var(--st-link-color);
+  --a2ui-textfield-color-border-focus: var(--st-primary-color);
+}
+
+.a2ui-waiting,
+.a2ui-surface:empty::before {
+  color: var(--st-gray-text-color);
+  font-style: italic;
+}
+
+.a2ui-surface:empty::before {
+  content: "Waiting for the surface root…";
+}
