@@ -37,6 +37,7 @@ export default defineConfig(() => {
                 dropConsole: true,
                 dropDebugger: true,
               },
+              codegen: { removeWhitespace: true },
             },
           },
         },

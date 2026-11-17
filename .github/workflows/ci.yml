@@ -14,14 +14,25 @@ concurrency:
 
 jobs:
   test:
-    name: Build, test, browser smoke test
+    name: Test (${{ matrix.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      # Two legs only: the declared floor, and the newest everything.
+      matrix:
+        include:
+          - name: py3.10 / streamlit floor
+            python: "3.10"
+            streamlit: "streamlit==1.59.*"
+          - name: py3.13 / streamlit latest
+            python: "3.13"
+            streamlit: "streamlit>=1.67"
     env:
-      PYTHON_VERSION: "3.13"
+      PYTHON_VERSION: ${{ matrix.python }}
       # Not STREAMLIT_*: Streamlit reads STREAMLIT_<OPTION> variables as CLI
       # options, so STREAMLIT_VERSION would be parsed as `streamlit --version`.
-      PIN_STREAMLIT: "1.67.*"
+      PIN_STREAMLIT: ${{ matrix.streamlit }}
     steps:
       # Third-party actions are pinned to a commit; the comment names the release.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -56,7 +67,7 @@ jobs:
       - name: "Python: install"
         run: |
           uv venv --python "$PYTHON_VERSION"
-          uv pip install -e . "streamlit==$PIN_STREAMLIT" \
+          uv pip install -e . "$PIN_STREAMLIT" \
             "pytest==9.2.0" "ruff==0.17.5" "pytest-playwright==0.10.0" "playwright==1.65.2"
 
       - name: "Python: lint"
@@ -76,7 +87,129 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: e2e-results
+          name: e2e-results-py${{ matrix.python }}
+          path: e2e-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Build the artifacts once. `wheel-smoke` (and, later, a release) use these
+  # exact files rather than rebuilding them.
+  package:
+    name: Build wheel and sdist
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: streamlit_a2ui/frontend/package-lock.json
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
+      - name: "Frontend: install"
+        working-directory: streamlit_a2ui/frontend
+        run: npm ci
+
+      - name: "Frontend: build"
+        working-directory: streamlit_a2ui/frontend
+        run: npm run build
+
+      # Two separate builds: a bare `uv build` makes the wheel from the sdist,
+      # which would leave nothing to compare against.
+      - name: Build sdist and wheel
+        run: |
+          uv build --sdist --out-dir dist
+          uv build --wheel --out-dir dist
+
+      # The sdist ships the prebuilt frontend, so a wheel built from it must
+      # not need Node. Build with a PATH that has uv and the system tools but
+      # no Node, then require the same files and digests as the direct wheel.
+      - name: Build a wheel from the sdist without Node and compare
+        run: |
+          UV_DIR="$(dirname "$(command -v uv)")"
+          env PATH="$UV_DIR:/usr/bin:/bin" bash -euo pipefail -c '
+            if command -v node; then echo "node is still on PATH" >&2; exit 1; fi
+            uv build --wheel --out-dir "$RUNNER_TEMP/from-sdist" dist/*.tar.gz
+          '
+          python3 scripts/compare_wheels.py dist/*.whl "$RUNNER_TEMP"/from-sdist/*.whl
+
+      - name: Check metadata with twine
+        run: uvx twine@7.0.0 check --strict dist/*
+
+      - name: Upload dist
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+          if-no-files-found: error
+
+  # Install the built wheel, not the source tree, and run the browser test
+  # against it. The checkout is only a source of e2e/ and examples/.
+  wheel-smoke:
+    name: Installed wheel smoke test
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
+      - name: Download dist
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: ${{ runner.temp }}/dist
+
+      - name: "Wheel: install into a fresh venv"
+        run: |
+          uv venv --python 3.13 "$RUNNER_TEMP/wheel-venv"
+          uv pip install --python "$RUNNER_TEMP/wheel-venv" \
+            "$RUNNER_TEMP"/dist/*.whl \
+            "pytest==9.2.0" "pytest-playwright==0.10.0" "playwright==1.65.2"
+
+      # From outside the checkout, so the source tree cannot be imported.
+      - name: "Wheel: import and call renderer_capabilities()"
+        working-directory: ${{ runner.temp }}
+        env:
+          CHECKOUT: ${{ github.workspace }}
+        run: |
+          "$RUNNER_TEMP/wheel-venv/bin/python" -c '
+          import os
+          from pathlib import Path
+          import streamlit_a2ui
+
+          path = Path(streamlit_a2ui.__file__).resolve()
+          checkout = Path(os.environ["CHECKOUT"]).resolve()
+          assert checkout not in path.parents, f"imported from the checkout: {path}"
+          assert "site-packages" in path.parts, f"not installed: {path}"
+          print("imported from", path)
+          print(streamlit_a2ui.renderer_capabilities())
+          '
+
+      - name: "Browser: install Chromium"
+        run: $RUNNER_TEMP/wheel-venv/bin/playwright install --with-deps chromium
+
+      # The test starts Streamlit from a temporary directory, so only the
+      # installed wheel provides streamlit_a2ui.
+      - name: "Browser: smoke test against the wheel"
+        run: |
+          "$RUNNER_TEMP/wheel-venv/bin/pytest" e2e -q \
+            --tracing retain-on-failure --output e2e-results
+
+      - name: "Browser: upload trace on failure"
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-results-wheel
           path: e2e-results
           retention-days: 7
           if-no-files-found: ignore

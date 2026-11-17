@@ -4,13 +4,28 @@ Open-source Python package that renders Google's A2UI protocol inside Streamlit 
 
 Personal open-source project. Never add employer code, names, hostnames or data. License: Apache-2.0.
 
-## Current milestone: M2 — release engineering (handoff pending)
+## Current milestone: M2 — release engineering
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`; handoff `docs/handoff-m1.md`). M2's CI workflow and Playwright smoke test were added early at the owner's request; the rest of M2 waits for the owner's M2 handoff. Do not start other M2 work before it exists. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`; handoff `docs/handoff-m1.md`). M2's CI workflow and Playwright smoke test were added early at the owner's request (PR #3, merged). The rest of M2 is defined in `docs/handoff-m2.md`; work on branch `m2-release`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
-Push or open a pull request only when the owner asks. Never publish.
+Push or open a pull request only when the owner asks. Never publish: no tags, no GitHub releases, no upload to PyPI or TestPyPI. `m2-release` tracks `origin/master`, so never run a bare `git push` from it; push with an explicit `origin m2-release` refspec.
+
+M2 makes the package releasable but does not release it. It passes when all ten hold:
+
+1. CI runs the full job on Python 3.10 with the Streamlit floor and on Python 3.13 with the latest Streamlit, and both pass on a pull request. The declared floor in `pyproject.toml` and the README is one that CI actually ran.
+2. CI builds the wheel and the sdist, installs the wheel into a fresh venv outside the checkout, imports it, and passes the e2e test against it.
+3. A wheel built from the sdist without Node has the same contents as the direct wheel. `twine check` (or equivalent) passes on both.
+4. The version is defined once. The package, the component manifest and `package.json` agree, and the version is `0.1.0rc1`.
+5. `release.yml` exists, and every third-party action in it is pinned to a SHA. Only the publish job has `id-token: write`, and it is gated by the `pypi` environment. It refuses a tag that doesn't match the version. A `workflow_dispatch` dry run builds and stops before publishing. No tag was created and nothing was uploaded.
+6. `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md` and `.github/dependabot.yml` exist. Dependabot ignores `@a2ui/*` and `dompurify`.
+7. A throwing surface shows a plain-text notice and leaves the other surfaces and the notices list rendered, as shown by a test.
+8. Bundle sizes are recorded before and after the whitespace change, with a keep or revert decision.
+9. All tests and linters pass locally and in CI. The click-through in `docs/testing-playbook.md` (parts 3 and 4) still passes in a browser, or is marked "needs owner verification".
+10. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md` and `docs/m2-report.md` exist and agree with each other.
+
+The result goes in `docs/m2-report.md`; then stop for the owner's review.
 
 ### M1 — harden the spike into v0.1 (done)
 
@@ -67,7 +82,7 @@ if event:
 | `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range (`web_core ^0.14.0`) is wrong for 0.15, so `package.json` carries a scoped npm `overrides` entry pointing it at the root `web_core`. Remove when upstream fixes it |
 | `dompurify` (inside `@a2ui/markdown-it`) | `3.4.18`, exact, via a scoped npm `overrides` entry (ADR-008). Upstream pins 3.4.11, which has open advisories fixed by 3.4.17. Remove when upstream ships a fix |
 | `zod` | 3.x required by `web_core`; open high advisory with no 3.x fix. Accepted residual risk (ADR-008) |
-| Streamlit | develop on 1.67.x; declare `streamlit>=1.51` |
+| Streamlit | develop on 1.67.x; declare `streamlit>=1.59`, the lowest release CI passes (M2: 1.51–1.58 fail, see `docs/m2-report.md`) |
 | Node | 24 (via nvm if the system Node is older) |
 | React | 18 or 19 (peer range of `@a2ui/react`); use what the template ships |
 | Basic catalog ID | `https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json` |
@@ -122,14 +137,23 @@ streamlit_a2ui/frontend/   Vite + React + TS; build output is the asset_dir
   scripts/                 build-time: capabilities, license texts, source-map check
 examples/basic_app.py      form surface, action round trip, scripted agent
 examples/streaming_app.py  fragment streaming plus an action from inside the fragment
-tests/                     pytest (default run)
+scripts/compare_wheels.py  compares two wheels by file name and SHA-256 (CI, release)
+tests/                     pytest (default run): API, version single source, built wheel contents
+  src/ErrorBoundary.tsx    per-surface React error boundary (the one class component)
 e2e/                       one Playwright browser smoke test (run with `pytest e2e`)
-.github/workflows/ci.yml   CI: build, unit tests, pytest, ruff, browser smoke test
+.github/workflows/ci.yml   CI: version matrix (build, tests, lint, e2e), wheel + sdist, installed-wheel smoke test
+.github/workflows/release.yml  tag v* → build, check, publish to PyPI via Trusted Publishing (never run in M2)
+.github/dependabot.yml     weekly npm, pip, github-actions; @a2ui/* and dompurify ignored
+CHANGELOG.md               Keep a Changelog
+CONTRIBUTING.md            build, test, scope, release process
+SECURITY.md                private reporting route; points at docs/security.md
+docs/architecture.md       current design, short
 docs/adr/                  NNNN-title.md
 docs/security.md           security model, overrides, residual risks, npm audit
 docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
 docs/spike-report.md       written at the end of M0
 docs/m1-report.md          written at the end of M1
+docs/m2-report.md          written at the end of M2
 docs/release-plan.md       milestones to 0.1.0
 docs/testing-playbook.md   manual and automated test steps
 docs/upstream-issues.md    drafts of issues to file upstream
@@ -163,26 +187,48 @@ uv pip install pytest-playwright
 .venv/bin/playwright install chromium
 .venv/bin/pytest e2e -q          # starts examples/basic_app.py, clicks Send, checks the round trip
 
-# wheel
-uv build
+# wheel and sdist (after npm run build). Build them separately: a bare `uv build`
+# makes the wheel from the sdist, leaving nothing to compare.
+uv build --sdist --out-dir dist
+uv build --wheel --out-dir dist
+uvx twine@7.0.0 check --strict dist/*
+# the sdist must rebuild the same wheel without Node (CI runs this with a PATH that has no node)
+uv build --wheel --out-dir /tmp/from-sdist dist/*.tar.gz
+python3 scripts/compare_wheels.py dist/*.whl /tmp/from-sdist/*.whl
+
+# installed-wheel smoke test: the wheel, not the source tree (the e2e server runs from a temp dir)
+uv venv --python 3.13 /tmp/a2ui-wheel
+uv pip install --python /tmp/a2ui-wheel dist/*.whl pytest==9.2.0 pytest-playwright==0.10.0 playwright==1.65.2
+(cd /tmp && /tmp/a2ui-wheel/bin/python -c "import streamlit_a2ui; print(streamlit_a2ui.__file__, streamlit_a2ui.renderer_capabilities())")
+/tmp/a2ui-wheel/bin/playwright install chromium
+/tmp/a2ui-wheel/bin/pytest e2e -q
+
+# version matrix, floor leg (CI's other leg is Python 3.13 with the latest Streamlit)
+uv venv --python 3.10 .venv-floor
+uv pip install --python .venv-floor -e . "streamlit==1.59.*" pytest==9.2.0 ruff==0.17.5 pytest-playwright==0.10.0 playwright==1.65.2
+.venv-floor/bin/pytest -q && .venv-floor/bin/pytest e2e -q
+
+# release dry run: builds and checks, never publishes (owner only; needs the branch pushed)
+gh workflow run release.yml --ref <branch>
 ```
 
-CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`: Node 24, Python 3.13, Streamlit 1.67. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA.
+CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`), and Python 3.13 with the latest Streamlit (`>=1.67`). A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check`, and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the e2e test against it. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag; only the owner creates tags.
 
-If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
+If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. Before building a wheel locally, delete the setuptools cache `build/` at the repo root: it keeps old bundles and setuptools ships them (CI checkouts are clean; `tests/test_wheel.py` fails on a second bundle). After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
 
 `renderer_capabilities.json` and `THIRD_PARTY_LICENSES.txt` are generated, git-ignored and shipped in the wheel. Never hand-edit them.
 
 ## Conventions
 
+- Version: defined once, in the root `pyproject.toml`. The component manifest and `package.json` have none (`tests/test_version.py`).
 - Python: 3.10+, full type hints, `ruff` for lint and format, `pytest`. Public API is exactly what `__init__.py` exports.
-- TypeScript: strict mode, no `any` in our code, function components only. Keep the frontend to a handful of files; it is glue, not an app.
-- Tests: pytest for the Python API and the built wheel's contents; one Playwright smoke test in `e2e/` (keep it to one; it guards against Streamlit breaking Components v2 behaviour); frontend unit tests for the cursor, replay and outbound wrapping. Python never parses message contents, so tests do not either.
+- TypeScript: strict mode, no `any` in our code, function components only, except the one class component `ErrorBoundary` (`getDerivedStateFromError` + `componentDidCatch`, Streamlit's own pattern; React has no hook for it). No `react-error-boundary`. Keep the frontend to a handful of files; it is glue, not an app.
+- Tests: pytest for the Python API and the built wheel's contents; one Playwright smoke test in `e2e/` (keep it to one; it guards against Streamlit breaking Components v2 behaviour); frontend unit tests for the cursor, replay, outbound wrapping and the error boundary. Python never parses message contents, so tests do not either.
 - Commits: small, imperative subject, one concern each.
 - Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. One file per ADR in `docs/adr/`.
 
 ## Out of scope — refuse or ask first
 
-Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing to PyPI or npm · pushing or opening a pull request unless the owner asks.
+Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing to PyPI, TestPyPI or npm, creating tags or GitHub releases, changing the repository's visibility (M3/M4) · running `release.yml` other than as a `workflow_dispatch` dry run the owner starts · a real agent or ADK example (M3) · filing upstream issues (the owner does) · coverage badges, a multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish · pushing or opening a pull request unless the owner asks.
 
 If a task seems to need one of these, stop and say so instead of building it.

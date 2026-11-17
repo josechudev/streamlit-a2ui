@@ -55,8 +55,10 @@ def wheel(tmp_path_factory: pytest.TempPathFactory) -> Iterator[zipfile.ZipFile]
 
 def test_wheel_ships_the_frontend_bundle(wheel: zipfile.ZipFile) -> None:
     names = wheel.namelist()
-    assert [n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.js", n)]
-    assert [n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.css", n)]
+    # Exactly one of each: the component's js=/css= globs fail on two matches,
+    # which a stale setuptools build/ directory in the checkout can cause.
+    assert len([n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.js", n)]) == 1
+    assert len([n for n in names if re.fullmatch(rf"{BUILD}index-[^/]+\.css", n)]) == 1
     assert "streamlit_a2ui/pyproject.toml" in names
 
 
@@ -70,6 +72,36 @@ def test_wheel_ships_third_party_licenses(wheel: zipfile.ZipFile) -> None:
     text = wheel.read("streamlit_a2ui/THIRD_PARTY_LICENSES.txt").decode("utf-8")
     for package in ("@a2ui/web_core@0.15.0", "dompurify@3.4.18", "react@", "lit@"):
         assert package in text
+
+
+def test_wheel_metadata_lists_both_license_files(wheel: zipfile.ZipFile) -> None:
+    # setuptools skips a missing license-files entry without a warning, so
+    # check the result: LICENSE and the generated third-party notices.
+    (metadata,) = [n for n in wheel.namelist() if n.endswith(".dist-info/METADATA")]
+    text = wheel.read(metadata).decode("utf-8")
+    assert "License-File: LICENSE\n" in text
+    assert "License-File: streamlit_a2ui/THIRD_PARTY_LICENSES.txt\n" in text
+    names = wheel.namelist()
+    assert any(n.endswith(".dist-info/licenses/LICENSE") for n in names)
+    assert any(
+        n.endswith(".dist-info/licenses/streamlit_a2ui/THIRD_PARTY_LICENSES.txt")
+        for n in names
+    )
+
+
+def test_wheel_ships_the_apache_license_text(wheel: zipfile.ZipFile) -> None:
+    (name,) = [n for n in wheel.namelist() if n.endswith(".dist-info/licenses/LICENSE")]
+    text = wheel.read(name).decode("utf-8")
+    assert "Apache License" in text
+    assert "Version 2.0, January 2004" in text
+
+
+def test_wheel_version_is_the_pyproject_version(wheel: zipfile.ZipFile) -> None:
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.MULTILINE)
+    assert match is not None
+    (metadata,) = [n for n in wheel.namelist() if n.endswith(".dist-info/METADATA")]
+    assert f"\nVersion: {match.group(1)}\n" in wheel.read(metadata).decode("utf-8")
 
 
 def test_wheel_has_no_source_maps(wheel: zipfile.ZipFile) -> None:

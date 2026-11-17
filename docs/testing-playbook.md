@@ -28,14 +28,14 @@ Rebuild the frontend before installing, and again after any frontend change. Aft
 
 | # | Command | Expected |
 |---|---|---|
-| A1 | `cd streamlit_a2ui/frontend && npm test` | 9 tests pass (cursor, replay, error reporting, waiting state, action wrapping, outbound passthrough) |
+| A1 | `cd streamlit_a2ui/frontend && npm test` | 12 tests pass (cursor, replay, error reporting, waiting state, action wrapping, outbound passthrough, error boundary) |
 | A2 | `cd streamlit_a2ui/frontend && npm run typecheck` | No errors |
-| A3 | `.venv/bin/pytest -q` | 17 tests pass. Builds a wheel and checks its contents, so it needs A0's `npm run build` |
+| A3 | `.venv/bin/pytest -q` | 23 tests pass. Builds a wheel and checks its contents, license text and version, so it needs part 0's `npm run build` |
 | A4 | `.venv/bin/ruff check . && .venv/bin/ruff format --check .` | No findings |
 | A5 | `cd streamlit_a2ui/frontend && npm run format:check` | "All matched files use Prettier code style!" |
 | A6 | `uv pip install pytest-playwright && .venv/bin/playwright install chromium && .venv/bin/pytest e2e -q` | 1 test passes: starts `examples/basic_app.py`, fills the form, presses Send, sees the reply and the returned action |
 
-CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request. On a failure, the run's `e2e-results` artifact holds a Playwright trace; open it with `.venv/bin/playwright show-trace <file>.zip`.
+CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request on two legs (Python 3.10 with Streamlit 1.59, Python 3.13 with the latest Streamlit), and G7–G9 below in its `package` and `wheel-smoke` jobs. On a failure, the run's `e2e-results` artifact holds a Playwright trace; open it with `.venv/bin/playwright show-trace <file>.zip`.
 
 ## 2. Build and packaging guards (about 5 minutes)
 
@@ -47,6 +47,9 @@ CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request. On a failure
 | G4 | Source-map guard fails when it should | `cd streamlit_a2ui/frontend && touch build/planted.map && node scripts/check-build.ts; echo "exit $?"; rm build/planted.map` | Error naming `planted.map`, `exit 1` |
 | G5 | Wheel contents | `uv build --wheel && unzip -l dist/streamlit_a2ui-*.whl` | Contains `index-*.js`, `index-*.css`, `renderer_capabilities.json`, `THIRD_PARTY_LICENSES.txt`; no `.map` files |
 | G6 | Import outside `streamlit run` | `.venv/bin/python -c "from streamlit_a2ui import renderer_capabilities; print(renderer_capabilities())"` | Prints the `1.0` capabilities with the basic catalog ID; no `StreamlitAPIException` |
+| G7 | The sdist rebuilds the same wheel without Node | `uv build --sdist --out-dir dist && uv build --wheel --out-dir dist`, then `env PATH="$(dirname "$(command -v uv)"):/usr/bin:/bin" uv build --wheel --out-dir /tmp/from-sdist dist/*.tar.gz` (check `command -v node` finds nothing under that `PATH` first), then `python3 scripts/compare_wheels.py dist/*.whl /tmp/from-sdist/*.whl` | `identical: N files, same names and SHA-256 digests` |
+| G8 | Metadata | `uvx twine@7.0.0 check --strict dist/*` | `PASSED` for the wheel and the sdist |
+| G9 | The installed wheel works without the source tree | The installed-wheel commands in `CLAUDE.md` ("Commands"): fresh venv, install `dist/*.whl`, import from `/tmp`, `pytest e2e` with that venv | `__file__` is in the venv's `site-packages`; 1 e2e test passes |
 
 ## 3. Manual click-through: basic example (about 5 minutes)
 
@@ -66,7 +69,7 @@ Open the URL it prints. Keep the browser's developer console open on the Console
 | B6 | Press **Send** after B5 | Still works: a new action arrives and the reply updates |
 | B7 | Press **Replace the log** | The surface rebuilds from scratch: fields empty, notice gone, title back to "Contact us" |
 | B8 | ⋮ menu → Settings → Theme: switch between Light and Dark | The surface, the notice (repeat B5 if needed) and the waiting text follow the theme. Text stays readable in both |
-| B9 | Reload the browser tab | The surface is rebuilt from the log (title updates kept). Unsent typed text is lost; that is expected and documented |
+| B9 | Reload the browser tab | A reload starts a new Streamlit session, so `st.session_state` and the log start over: the form is back to "Contact us" with empty fields and no notice. Rebuilding a surface from an existing log is covered by B7 and the unit tests |
 
 ## 4. Manual click-through: streaming example (about 5 minutes)
 
@@ -105,9 +108,9 @@ Then run parts 0 and 1 inside `/tmp/a2ui-clean`, and start each example once (B1
 ## Not covered by this playbook
 
 - A real agent. Every payload is scripted; M3 adds a Google ADK check.
-- The declared Streamlit floor (`>=1.51`); only 1.67 has been run, locally and in CI. M2's version matrix will cover it.
+- Streamlit releases between the floor (1.59) and the latest are not run; CI runs only those two.
 - Windows, Linux, and classic (non-overlay) scrollbars.
-- An exception thrown while React renders a surface: it would blank the component. The error boundary is planned for M2.
+- An exception thrown while React renders a surface, in a browser. No A2UI message is known to cause one; the per-surface error boundary is covered by a Vitest test (`src/ErrorBoundary.test.tsx`).
 
 ## Troubleshooting
 
@@ -118,4 +121,5 @@ Then run parts 0 and 1 inside `/tmp/a2ui-clean`, and start each example once (B1
 | A `js=` or `css=` pattern matches more than one file | `npm run clean`, then `npm run build` |
 | `renderer_capabilities()` raises `FileNotFoundError` | Run `npm run build`; the JSON file is generated, not committed |
 | pytest fails building the wheel | Run `npm run build` first |
+| `test_wheel_ships_the_frontend_bundle` fails, or a local wheel holds more than one `index-*.js` | Delete the setuptools cache `build/` at the repo root (not `streamlit_a2ui/frontend/build/`); it keeps old bundles and setuptools copies them into the wheel |
 | Port 8501 in use | `.venv/bin/streamlit run examples/basic_app.py --server.port 8502` |

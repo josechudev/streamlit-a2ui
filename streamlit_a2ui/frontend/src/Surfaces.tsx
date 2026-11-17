@@ -2,6 +2,7 @@ import { renderMarkdown } from "@a2ui/markdown-it";
 import { A2uiSurface, MarkdownContext } from "@a2ui/react";
 import { FC, ReactElement, useSyncExternalStore } from "react";
 
+import ErrorBoundary from "./ErrorBoundary";
 import type { LogSession, Snapshot } from "./session";
 
 /** Plain-text list of processing and surface errors. Never renders HTML. */
@@ -44,7 +45,9 @@ const Surfaces: FC<{ session: LogSession }> = ({ session }): ReactElement => {
             key={`${snapshot.generation}:${surface.id}`}
             className="a2ui-surface"
           >
-            <A2uiSurface surface={surface} />
+            <ErrorBoundary surfaceId={surface.id}>
+              <A2uiSurface surface={surface} />
+            </ErrorBoundary>
           </div>
         ))}
       </MarkdownContext.Provider>
