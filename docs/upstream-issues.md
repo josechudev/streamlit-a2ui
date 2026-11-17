@@ -1,14 +1,14 @@
 # Upstream issue drafts
 
-Drafts for the owner to file on [a2ui-project/a2ui](https://github.com/a2ui-project/a2ui) (the repository named in every `@a2ui/*` `package.json`). Not filed yet.
+Drafts for the owner to file on [a2ui-project/a2ui](https://github.com/a2ui-project/a2ui) (the repository named in every `@a2ui/*` `package.json`). Filed or commented on by the owner on 2026-11-17, except issue 4 (see the table).
 
-Checked 2026-11-17 against `@a2ui/react` 0.15.0, `@a2ui/web_core` 0.15.0 and `@a2ui/markdown-it` 0.2.2. Before filing each one: check the latest published versions, search existing issues and pull requests, and follow the repository's contribution instructions. Once filed, link the issue from `docs/security.md`, ADR-008 and the relevant `package.json` override, and record the URL here.
+Checked 2026-11-17 against `@a2ui/react` 0.15.0, `@a2ui/web_core` 0.15.0 and `@a2ui/markdown-it` 0.2.2. Before filing each one: check the latest published versions, search existing issues and pull requests, and follow the repository's contribution instructions. Once filed, link the issue from `docs/security.md`, ADR-008 and the relevant `package.json` override, and record the URL here. `package.json` cannot carry comments, so the overrides there are not annotated.
 
 | # | Package | Title | Filed |
 |---|---|---|---|
-| 1 | `@a2ui/markdown-it` | Peer range `@a2ui/web_core@^0.14.0` conflicts with `@a2ui/react@0.15.0` | **already reported** by someone else: [a2ui-project/a2ui#4059](https://github.com/a2ui-project/a2ui/issues/4059) (open). Comment there instead of filing |
-| 2 | `@a2ui/markdown-it` | Exact `dompurify` 3.4.11 pin matches published advisories | no |
-| 3 | `@a2ui/web_core` | Basic catalog always adopts its stylesheet onto `document` | no |
+| 1 | `@a2ui/markdown-it` | Peer range `@a2ui/web_core@^0.14.0` conflicts with `@a2ui/react@0.15.0` | already reported by someone else as [a2ui-project/a2ui#4059](https://github.com/a2ui-project/a2ui/issues/4059); the owner added our reproduction and workaround in [a comment](https://github.com/a2ui-project/a2ui/issues/4059#issuecomment-6963622021) |
+| 2 | `@a2ui/markdown-it` | Exact `dompurify` 3.4.11 pin matches published advisories | [a2ui-project/a2ui#4278](https://github.com/a2ui-project/a2ui/issues/4278) |
+| 3 | `@a2ui/web_core` | Basic catalog always adopts its stylesheet onto `document` | [a2ui-project/a2ui#4279](https://github.com/a2ui-project/a2ui/issues/4279) |
 | 4 | `@a2ui/web_core` | 1.0 `updateComponents` accepts component types the catalog does not define | **do not file as drafted**; see below |
 
 ### Recheck, 2026-11-17 (M3)
