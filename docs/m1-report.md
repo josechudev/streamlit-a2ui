@@ -79,7 +79,7 @@ None of the 32 production npm dependencies ships a `NOTICE` file, so Apache-2.0 
 
 ## Wrong in the handoff or `CLAUDE.md`
 
-1. **"Restore the template's `dropConsole`" conflicts with "keep the `console.warn`".** The template's `dropConsole: true` removes every `console.*` call, including ours. Resolved by restoring the default and calling `warn` through a reference bound in `session.ts`, which the minifier leaves in place (checked in the bundle and in the browser console). Side effect: `web_core`'s own console diagnostics are stripped from production builds. Owner: keep, or set `dropConsole: false`?
+1. **"Restore the template's `dropConsole`" conflicts with "keep the `console.warn`".** The template's `dropConsole: true` removes every `console.*` call, including ours. Resolved by restoring the default and calling `warn` through a reference bound in `session.ts`, which the minifier leaves in place (checked in the bundle and in the browser console). Side effect: `web_core`'s own console diagnostics are stripped from production builds. Owner decision (2026-11-17): keep `dropConsole: true` with the bound `warn`.
 2. **"A deliberately invalid message"**: `@a2ui/web_core` 0.15.0 accepts unknown component types without an error, even when they are in the rendered tree. The example uses a `Text` without `text`, which fails validation.
 3. **Surface errors are re-emitted on `model.onError`.** Subscribing to both reports each error twice.
 4. **Import-time registration made the package unimportable outside `streamlit run`.** Streamlit resolves `asset_dir` only after its runtime starts, so `from streamlit_a2ui import renderer_capabilities` in a plain agent process raised `StreamlitAPIException`. Registration now happens on the first `a2ui_surface` call.
