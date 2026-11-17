@@ -87,6 +87,21 @@ def test_wheel_metadata_lists_both_license_files(wheel: zipfile.ZipFile) -> None
     )
 
 
+def test_wheel_ships_the_apache_license_text(wheel: zipfile.ZipFile) -> None:
+    (name,) = [n for n in wheel.namelist() if n.endswith(".dist-info/licenses/LICENSE")]
+    text = wheel.read(name).decode("utf-8")
+    assert "Apache License" in text
+    assert "Version 2.0, January 2004" in text
+
+
+def test_wheel_version_is_the_pyproject_version(wheel: zipfile.ZipFile) -> None:
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.MULTILINE)
+    assert match is not None
+    (metadata,) = [n for n in wheel.namelist() if n.endswith(".dist-info/METADATA")]
+    assert f"\nVersion: {match.group(1)}\n" in wheel.read(metadata).decode("utf-8")
+
+
 def test_wheel_has_no_source_maps(wheel: zipfile.ZipFile) -> None:
     assert not [n for n in wheel.namelist() if n.endswith(".map")]
     for name in wheel.namelist():
