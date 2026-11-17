@@ -28,12 +28,15 @@ Handoff to write after M1 is merged.
 - **Packaging metadata:** single-sourced version, classifiers, project URLs, `LICENSE` and the generated `THIRD_PARTY_LICENSES.txt` in the wheel (no `NOTICE`: no bundled dependency ships one, see `docs/m1-report.md`), sdist that can rebuild the frontend (or a documented decision that it can't).
 - **Release workflow:** tag `v*` → build in CI → publish with PyPI Trusted Publishing (OIDC, no API token stored). Configure the publisher as "pending" on PyPI so the first upload claims the name.
 - **Repo hygiene, minimal:** `CHANGELOG.md`, short `CONTRIBUTING.md` (how to build, the out-of-scope list), `SECURITY.md` pointing to `docs/security.md` with a private reporting route, Dependabot for npm and pip with `@a2ui/*` excluded from auto-bumps (pins are deliberate).
+- **Bundle whitespace:** try `codegen.removeWhitespace` in the Vite build. Record raw and gzip size before and after; keep it only if the bundle still passes every test and the browser smoke test.
+- **The M2 handoff must also:** refresh `docs/architecture.md` (it still describes the end of M0; fold in M1's findings and the ADRs); lift the `CLAUDE.md` out-of-scope bans that M2 and M3 need (CI workflows, publishing to PyPI); keep every other ban.
 
 Not in M2: docs site, coverage badges, multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish.
 
 ### M3 — Release candidate and real-agent check
-- **Upstream reports first** (so the README can link them): the `@a2ui/markdown-it` peer range and DOMPurify pin; `injectBasicCatalogStyles()` writing page-wide styles. Link the issues from `docs/security.md` and ADR-008.
+- **Upstream reports first** (so the README can link them): the `@a2ui/markdown-it` peer range and DOMPurify pin; `injectBasicCatalogStyles()` writing page-wide styles; `web_core` accepting unknown component types. Drafts in `docs/upstream-issues.md`. Link the issues from `docs/security.md` and ADR-008.
 - **Real-agent check, outside the package.** Every payload so far was hand-written. In a scratch repo (personal machine, no employer code), build a minimal Google ADK agent with `a2ui-agent-sdk`, feed it `renderer_capabilities()`, and drive a surface through one action round trip and one streamed response. Record what broke. Fix bugs in the package; do not add an adapter. Whether a cleaned version ships as `examples/adk_agent_app.py` (needs an API key) is a decision for then.
+  - Also watch for a second renderer-to-agent message replacing the first before a rerun (two quick clicks, or an action during a `callAgentFunction`). Record whether it happens; fixing it changes the return type and needs an ADR, so do not fix it in M3.
 - **Publish `0.1.0rc1`** through the release workflow. Install it from PyPI in a fresh venv on another machine or container and run both examples. This is the first time the wheel leaves the build machine.
 - **README pass:** a GIF of the basic example, install from PyPI, status badge text that says pre-1.0.
 
