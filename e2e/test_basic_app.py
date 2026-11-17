@@ -63,7 +63,8 @@ def _wait_healthy(url: str, server: subprocess.Popen[bytes], log: Path) -> None:
 @pytest.fixture(scope="module")
 def app_url(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
     port = _free_port()
-    log = tmp_path_factory.mktemp("streamlit") / "server.log"
+    workdir = tmp_path_factory.mktemp("streamlit")
+    log = workdir / "server.log"
     log_file = log.open("wb")
     server = subprocess.Popen(
         [
@@ -81,7 +82,9 @@ def app_url(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
             "--browser.gatherUsageStats",
             "false",
         ],
-        cwd=ROOT,
+        # Not the checkout: `python -m` puts the working directory on
+        # sys.path, which would let the source tree shadow an installed wheel.
+        cwd=workdir,
         stdout=log_file,
         stderr=subprocess.STDOUT,
     )
