@@ -25,3 +25,7 @@ streamlit_a2ui = ["frontend/build/**/*", "pyproject.toml", "renderer_capabilitie
 [tool.pytest.ini_options]
 # The browser test in e2e/ is run on its own: `pytest e2e`.
 testpaths = ["tests"]
+filterwarnings = [
+    # Raised by pytest-base-url (pulled in by pytest-playwright), not by our code.
+    "ignore:Session-scoped fixtures defined as instance methods:pytest.PytestRemovedIn10Warning",
+]
