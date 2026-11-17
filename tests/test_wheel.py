@@ -72,6 +72,21 @@ def test_wheel_ships_third_party_licenses(wheel: zipfile.ZipFile) -> None:
         assert package in text
 
 
+def test_wheel_metadata_lists_both_license_files(wheel: zipfile.ZipFile) -> None:
+    # setuptools skips a missing license-files entry without a warning, so
+    # check the result: LICENSE and the generated third-party notices.
+    (metadata,) = [n for n in wheel.namelist() if n.endswith(".dist-info/METADATA")]
+    text = wheel.read(metadata).decode("utf-8")
+    assert "License-File: LICENSE\n" in text
+    assert "License-File: streamlit_a2ui/THIRD_PARTY_LICENSES.txt\n" in text
+    names = wheel.namelist()
+    assert any(n.endswith(".dist-info/licenses/LICENSE") for n in names)
+    assert any(
+        n.endswith(".dist-info/licenses/streamlit_a2ui/THIRD_PARTY_LICENSES.txt")
+        for n in names
+    )
+
+
 def test_wheel_has_no_source_maps(wheel: zipfile.ZipFile) -> None:
     assert not [n for n in wheel.namelist() if n.endswith(".map")]
     for name in wheel.namelist():
