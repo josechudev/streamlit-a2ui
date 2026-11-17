@@ -1,2 +1,3 @@
 recursive-include streamlit_a2ui/frontend/build *
+include streamlit_a2ui/renderer_capabilities.json
 include pyproject.toml

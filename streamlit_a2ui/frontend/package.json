@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run clean && npm run typecheck && npm run build:frontend:production",
+    "build": "npm run clean && npm run typecheck && npm run build:frontend:production && npm run check:build && npm run capabilities",
     "build:frontend:production": "cross-env NODE_ENV=production vite build",
     "clean": "rimraf build",
     "dev": "cross-env NODE_ENV=development vite build --watch",
-    "format": "prettier --write src/**/*.{ts,tsx} vite.config.ts",
+    "format": "prettier --write src/**/*.{ts,tsx} scripts/*.ts vite.config.ts",
     "typecheck": "tsc --noEmit",
+    "capabilities": "node scripts/generate-capabilities.ts",
+    "check:build": "node scripts/check-build.ts",
     "test": "vitest run"
   },
   "prettier": {},
