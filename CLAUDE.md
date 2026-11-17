@@ -4,28 +4,34 @@ Open-source Python package that renders Google's A2UI protocol inside Streamlit 
 
 Personal open-source project. Never add employer code, names, hostnames or data. License: Apache-2.0.
 
-## Current milestone: M2 — release engineering
+## Current milestone: M3 — release candidate and real-agent check
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`; handoff `docs/handoff-m1.md`). M2's CI workflow and Playwright smoke test were added early at the owner's request (PR #3, merged). The rest of M2 is defined in `docs/handoff-m2.md`; work on branch `m2-release`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 is defined in `docs/handoff-m3.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
-Push or open a pull request only when the owner asks. Never publish: no tags, no GitHub releases, no upload to PyPI or TestPyPI. `m2-release` tracks `origin/master`, so never run a bare `git push` from it; push with an explicit `origin m2-release` refspec.
+Push or open a pull request only when the owner asks. Work on a branch cut from `master`; `master` is protected, so changes land through a pull request with the four CI checks green. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from `origin/master` tracks it.
 
-M2 makes the package releasable but does not release it. It passes when all ten hold:
+**Publishing.** M3 publishes `0.1.0rc1`, and it happens only one way: `release.yml`, triggered by a `v*` tag that the owner creates and pushes, publishing after the owner approves the `pypi` environment. Claude Code never creates or pushes a tag, never uploads to PyPI or TestPyPI, never runs `twine upload` or `uv publish`, never creates a GitHub release, and never runs `release.yml` except as a `workflow_dispatch` dry run the owner asks for.
 
-1. CI runs the full job on Python 3.10 with the Streamlit floor and on Python 3.13 with the latest Streamlit, and both pass on a pull request. The declared floor in `pyproject.toml` and the README is one that CI actually ran.
-2. CI builds the wheel and the sdist, installs the wheel into a fresh venv outside the checkout, imports it, and passes the e2e test against it.
-3. A wheel built from the sdist without Node has the same contents as the direct wheel. `twine check` (or equivalent) passes on both.
-4. The version is defined once. The package, the component manifest and `package.json` agree, and the version is `0.1.0rc1`.
-5. `release.yml` exists, and every third-party action in it is pinned to a SHA. Only the publish job has `id-token: write`, and it is gated by the `pypi` environment. It refuses a tag that doesn't match the version. A `workflow_dispatch` dry run builds and stops before publishing. No tag was created and nothing was uploaded.
-6. `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md` and `.github/dependabot.yml` exist. Dependabot ignores `@a2ui/*` and `dompurify`.
-7. A throwing surface shows a plain-text notice and leaves the other surfaces and the notices list rendered, as shown by a test.
-8. Bundle sizes are recorded before and after the whitespace change, with a keep or revert decision.
-9. All tests and linters pass locally and in CI. The click-through in `docs/testing-playbook.md` (parts 3 and 4) still passes in a browser, or is marked "needs owner verification".
-10. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md` and `docs/m2-report.md` exist and agree with each other.
+M3 publishes the first release candidate and checks the package against a real agent. It passes when all eight hold:
 
-The result goes in `docs/m2-report.md`; then stop for the owner's review.
+1. The four upstream issues are filed by the owner, or the report says why one was not. Their URLs are in `docs/upstream-issues.md` and linked from `docs/security.md` and ADR-008 (issues 1 and 2), from `docs/security.md` (issue 3) and from the README (issue 4).
+2. A minimal ADK agent built with `a2ui-agent-sdk`, outside this repository, received `renderer_capabilities()` and drove a surface rendered by `a2ui_surface` in a browser through one action round trip and one streamed response. The report lists the versions used and what broke. Each package bug found is fixed with a test. No adapter or agent dependency was added to the package.
+3. The report records whether a second renderer-to-agent message replaced the first before a rerun, with the steps used. The behaviour is unchanged, and the README states the measured result.
+4. The README says how to install from PyPI, states the pre-1.0 status, shows a GIF of the basic example, and renders correctly on PyPI with working absolute links. The GIF is in neither the wheel nor the sdist.
+5. `streamlit-a2ui 0.1.0rc1` is on PyPI, published by `release.yml` from tag `v0.1.0rc1`. The owner pushed the tag and approved the `pypi` environment. The files on PyPI match the run's artifact by SHA-256. Claude Code created no tag, uploaded nothing and created no GitHub release.
+6. In a fresh environment outside the checkout, `0.1.0rc1` installed from PyPI imports from `site-packages`, and both examples pass playbook parts 3 and 4 in a browser, or are marked "needs owner verification".
+7. All tests and linters pass locally and in CI. Nothing in the Architecture or Security sections changed without an ADR and the owner's approval.
+8. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md`, `docs/upstream-issues.md` and `docs/m3-report.md` exist and agree with each other.
+
+The real-agent check runs in a scratch folder outside this repository; the model API key is the owner's and never enters the repository, a note, the report or a logged command line. Open owner decision before the tag: whether to keep the e-mail address in `pyproject.toml`'s `authors`, which becomes permanently public with `rc1`.
+
+The result goes in `docs/m3-report.md`; then stop for the owner's review.
+
+### M2 — release engineering (done)
+
+M2 made the package releasable without releasing it: a two-leg CI matrix (Python 3.10 with Streamlit `1.59.*`, Python 3.13 with the latest), wheel and sdist built once with a Node-free sdist rebuild compared against the direct wheel, an installed-wheel browser test, the version single-sourced as `0.1.0rc1`, `release.yml` (written, never run), repository hygiene files, the per-surface error boundary, and a whitespace-stripped bundle. All ten criteria passed; criteria 1, 2, 3 and 9 on GitHub with PR #4, criterion 5 by review only. The result is in `docs/m2-report.md`, the handoff in `docs/handoff-m2.md`.
 
 ### M1 — harden the spike into v0.1 (done)
 
@@ -78,7 +84,7 @@ if event:
 | Thing | Value |
 |---|---|
 | A2UI spec | 1.0 only. 0.9.x is untested and unsupported |
-| `@a2ui/react`, `@a2ui/web_core` | `0.15.0`, exact pins, no `^`. Do not upgrade in M1, even if a newer release is published; note it in the report |
+| `@a2ui/react`, `@a2ui/web_core` | `0.15.0`, exact pins, no `^`. Do not upgrade before 0.1.0, even if a newer release is published; note it in the report |
 | `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range (`web_core ^0.14.0`) is wrong for 0.15, so `package.json` carries a scoped npm `overrides` entry pointing it at the root `web_core`. Remove when upstream fixes it |
 | `dompurify` (inside `@a2ui/markdown-it`) | `3.4.18`, exact, via a scoped npm `overrides` entry (ADR-008). Upstream pins 3.4.11, which has open advisories fixed by 3.4.17. Remove when upstream ships a fix |
 | `zod` | 3.x required by `web_core`; open high advisory with no 3.x fix. Accepted residual risk (ADR-008) |
@@ -105,6 +111,22 @@ API notes that are easy to get wrong:
 - A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/notes-m1.md`).
 - The published README still shows v0.9 examples. Trust `node_modules/@a2ui/*/` type definitions and CHANGELOG over blog posts or memory; these packages had breaking changes in 0.13, 0.14 and 0.15.
 - 1.0 wire format differs from 0.9: dynamic values use `@path`, `@call`, `@index`; naming is renderer/agent. The envelope is `{"version":"1.0","createSurface":{...}}`. Take sample payloads from the 1.0 spec (`node_modules/@a2ui/web_core/src/v1_0/schemas/`, including `catalogs/basic/examples/`), not from older tutorials.
+
+## Repository facts (set up by the owner after M2; verified 2026-11-17)
+
+Claude Code never changes these settings; they are the owner's.
+
+| Thing | Value |
+|---|---|
+| Repository | `josechudev/streamlit-a2ui`, **public** (since M3, not M4: GitHub Free has no environment reviewers on private repositories; a full-history secret and employer-data scan was clean first) |
+| `master` ruleset | no deletion or force-push; pull request required (0 approvals); required checks `Test (py3.10 / streamlit floor)`, `Test (py3.13 / streamlit latest)`, `Build wheel and sdist`, `Installed wheel smoke test`; no bypass |
+| `release tag` ruleset | `refs/tags/v*`: no deletion, update or force-push; no bypass. To re-tag after a failed run that uploaded nothing, the owner disables it temporarily. Never re-tag a version already on PyPI |
+| GitHub environment `pypi` | owner is the required reviewer; admins cannot bypass; deployments only from tags `v*` |
+| PyPI | pending Trusted Publisher: project `streamlit-a2ui`, repository `josechudev/streamlit-a2ui`, workflow `release.yml`, environment `pypi`. The project does not exist yet; a pending publisher does not reserve the name |
+| Security settings | private vulnerability reporting, secret scanning with push protection, Dependabot alerts and security updates, SHA pinning of actions required, read-only default workflow token, merged branches auto-deleted |
+| Topics | `a2ui`, `python`, `streamlit`, `streamlit-component` |
+| Dependabot | React, `react-dom` and their types grouped; React and `@types/node` majors held (React stays 18 until after 0.1.0); `@types/node` `^24`. The red "Dependabot Updates" runs for `zod` end in `security_update_not_possible`: expected, the accepted advisory in `docs/security.md` |
+| Tags, releases | none yet. `streamlit-a2ui` is not on PyPI |
 
 ## Security rules (non-negotiable)
 
@@ -142,7 +164,7 @@ tests/                     pytest (default run): API, version single source, bui
   src/ErrorBoundary.tsx    per-surface React error boundary (the one class component)
 e2e/                       one Playwright browser smoke test (run with `pytest e2e`)
 .github/workflows/ci.yml   CI: version matrix (build, tests, lint, e2e), wheel + sdist, installed-wheel smoke test
-.github/workflows/release.yml  tag v* → build, check, publish to PyPI via Trusted Publishing (never run in M2)
+.github/workflows/release.yml  tag v* → build, check, publish to PyPI via Trusted Publishing (first run in M3)
 .github/dependabot.yml     weekly npm, pip, github-actions; @a2ui/* and dompurify ignored
 CHANGELOG.md               Keep a Changelog
 CONTRIBUTING.md            build, test, scope, release process
@@ -154,6 +176,8 @@ docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
 docs/spike-report.md       written at the end of M0
 docs/m1-report.md          written at the end of M1
 docs/m2-report.md          written at the end of M2
+docs/handoff-m1.md … -m3.md  one handoff per milestone: decisions, steps, acceptance criteria
+docs/m3-report.md          written at the end of M3
 docs/release-plan.md       milestones to 0.1.0
 docs/testing-playbook.md   manual and automated test steps
 docs/upstream-issues.md    drafts of issues to file upstream
@@ -208,11 +232,20 @@ uv venv --python 3.10 .venv-floor
 uv pip install --python .venv-floor -e . "streamlit==1.59.*" pytest==9.2.0 ruff==0.17.5 pytest-playwright==0.10.0 playwright==1.65.2
 .venv-floor/bin/pytest -q && .venv-floor/bin/pytest e2e -q
 
-# release dry run: builds and checks, never publishes (owner only; needs the branch pushed)
+# release dry run: builds and checks, never publishes (the owner runs it, or asks for it; needs the branch pushed)
 gh workflow run release.yml --ref <branch>
+
+# install a published release candidate from PyPI (M3): fresh venv, no cache, outside the checkout.
+# Pre-releases need --pre or an exact pin with pip, --prerelease=allow or an exact pin with uv.
+uv venv --python 3.13 /tmp/a2ui-pypi
+uv pip install --python /tmp/a2ui-pypi --no-cache "streamlit-a2ui==0.1.0rc1"
+(cd /tmp && /tmp/a2ui-pypi/bin/python -c "import streamlit_a2ui, importlib.metadata as m; print(streamlit_a2ui.__file__, m.version('streamlit-a2ui'))")
+# the examples are not in the wheel: take them from the tag into an empty folder and run them there
+mkdir -p /tmp/a2ui-pypi-examples && git show v0.1.0rc1:examples/basic_app.py > /tmp/a2ui-pypi-examples/basic_app.py
+(cd /tmp/a2ui-pypi-examples && /tmp/a2ui-pypi/bin/streamlit run basic_app.py)
 ```
 
-CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`), and Python 3.13 with the latest Streamlit (`>=1.67`). A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check`, and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the e2e test against it. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag; only the owner creates tags.
+CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`), and Python 3.13 with the latest Streamlit (`>=1.67`). A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check`, and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the e2e test against it. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag, after the owner approves the `pypi` environment; only the owner creates and pushes tags.
 
 If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. Before building a wheel locally, delete the setuptools cache `build/` at the repo root: it keeps old bundles and setuptools ships them (CI checkouts are clean; `tests/test_wheel.py` fails on a second bundle). After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
 
@@ -229,6 +262,6 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 
 ## Out of scope — refuse or ask first
 
-Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing to PyPI, TestPyPI or npm, creating tags or GitHub releases, changing the repository's visibility (M3/M4) · running `release.yml` other than as a `workflow_dispatch` dry run the owner starts · a real agent or ADK example (M3) · filing upstream issues (the owner does) · coverage badges, a multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish · pushing or opening a pull request unless the owner asks.
+Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing by any route other than `release.yml` on a `v*` tag the owner pushes and approves: Claude Code never creates or pushes tags, never uploads to PyPI, TestPyPI or npm, never runs `twine upload` or `uv publish`, never creates GitHub releases · running `release.yml` other than as a `workflow_dispatch` dry run the owner starts or asks for · `0.1.0`, the GitHub release, gallery listings and posts (M4) · changing the repository's visibility, settings, rulesets or environments (the owner's) · an agent or ADK example in this repository without the owner's approval after M3's real-agent check (the check itself runs in a scratch folder outside the repository) · upgrading `@a2ui/*`, `dompurify` or React · filing upstream issues (the owner does) · coverage badges, a multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish · pushing or opening a pull request unless the owner asks.
 
 If a task seems to need one of these, stop and say so instead of building it.
