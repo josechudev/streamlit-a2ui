@@ -106,3 +106,17 @@ These are proposals, not work done.
 5. **Lazy registration** deviates from Streamlit's usual module-level pattern. It works under `streamlit run`, `AppTest` and plain imports; a Streamlit change to registration timing would surface here first.
 6. **`docs/architecture.md`** still describes the state at the end of M0; fold M1's findings in when it is next revised.
 7. **Next milestone candidates:** report errors to the agent (ADR-009 follow-up), a CI workflow, publishing. All out of scope for M1.
+
+## Owner decisions after the report (2026-11-17)
+
+| # | Item | Decision |
+|---|---|---|
+| — | `dropConsole` | Keep `dropConsole: true`; our one `console.warn` goes through the bound reference in `session.ts` |
+| 2 | Render-time exceptions | Follow Streamlit's own pattern. Streamlit's frontend uses one small class component, `ErrorBoundary` (`frontend/lib/src/components/shared/ErrorBoundary/ErrorBoundary.tsx`: `getDerivedStateFromError` plus `componentDidCatch`, renders an error element). React's documentation offers the same two choices: write a single `ErrorBoundary` class and reuse it, or use the `react-error-boundary` package. `@a2ui/react` 0.15.0 has no boundary of its own. Implementation, and the `CLAUDE.md` convention exception it needs, are not done yet |
+| 3 | Second outbound message per rerun | Watch for it during M3's real-agent check before changing anything; a fix changes the return type and needs an ADR |
+| 4 | Bundle whitespace | Try `codegen.removeWhitespace` in M2 |
+| 5 | Lazy registration | Accepted. M2's CI on the Streamlit floor and latest guards against a registration-timing change |
+| 6 | `docs/architecture.md` | Refresh it as part of the M2 handoff |
+| 1 | Upstream reports | Owner files them; drafts in `docs/upstream-issues.md` |
+| — | `THIRD_PARTY_LICENSES.txt` | Keep it in the wheel |
+| — | Merge to `master` | After the owner has reviewed the frontend diff |
