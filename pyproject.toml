@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streamlit-a2ui"
+version = "0.0.1"
+description = "Streamlit component that allows you to do X"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "jose chu", email = "jose.chu.dev@gmail.com" }]
+dependencies = ["streamlit >= 1.51"]
+
+[tool.setuptools.packages.find]
+include = ["streamlit_a2ui*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+streamlit_a2ui = ["frontend/build/**/*", "pyproject.toml"]

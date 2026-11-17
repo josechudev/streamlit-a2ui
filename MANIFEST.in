@@ -1,0 +1,2 @@
+recursive-include streamlit_a2ui/frontend/build *
+include pyproject.toml
