@@ -85,21 +85,46 @@ describe("LogSession", () => {
     );
   });
 
-  it("reports a rejected message and keeps processing later ones", async () => {
+  it("reports a rejected message once and keeps processing later ones", async () => {
     const { session } = trackedSession();
+    const surfaceId = "gallery-simple-login-form";
+    // A Text without its required `text`: rejected by surface validation.
     const invalid = {
       version: "1.0",
-      updateComponents: { surfaceId: "nowhere", components: [] },
+      updateComponents: {
+        surfaceId,
+        components: [{ id: "form_title", component: "Text" }],
+      },
+    };
+    const later = {
+      version: "1.0",
+      updateComponents: {
+        surfaceId,
+        components: [{ id: "form_title", component: "Text", text: "Later" }],
+      },
     };
 
-    session.sync([invalid, ...login]);
-    await Promise.resolve();
+    session.sync([...login, invalid, later]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     const snapshot = session.getSnapshot();
     expect(snapshot.noticeCount).toBe(1);
-    expect(snapshot.notices[0].code).toEqual(expect.any(String));
-    expect(snapshot.notices[0].message).not.toBe("");
+    expect(snapshot.notices[0]).toMatchObject({
+      code: "VALIDATION_FAILED",
+      surfaceId,
+    });
     expect(snapshot.hasRoot).toBe(true);
+    const title = snapshot.surfaces[0].componentsModel.get("form_title");
+    expect(title?.properties).toMatchObject({ text: "Later" });
+  });
+
+  it("reports a message without a surface", async () => {
+    const { session } = trackedSession();
+    session.sync([{ version: "9.9", createSurface: {} }]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(session.getSnapshot().notices).toEqual([
+      expect.objectContaining({ code: "VALIDATION_FAILED" }),
+    ]);
   });
 
   it("waits until a surface has its root component", () => {

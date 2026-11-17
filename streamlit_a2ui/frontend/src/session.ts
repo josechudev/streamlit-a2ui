@@ -73,8 +73,7 @@ export class LogSession {
   private generation = 0;
   private notices: Notice[] = [];
   private noticeCount = 0;
-  private processorSubscriptions: Subscription[] = [];
-  private readonly surfaceSubscriptions = new Map<string, Subscription>();
+  private errorSubscription: Subscription | undefined;
   private readonly listeners = new Set<() => void>();
   private snapshot: Snapshot;
   private disposed = false;
@@ -90,8 +89,8 @@ export class LogSession {
     if (!this.extendsProcessed(log)) this.replay();
     if (log.length > this.cursor) {
       const tail = log.slice(this.cursor);
-      // Errors are reported through the surface and model error events, which
-      // also carry errors raised while rendering; the return value repeats them.
+      // Errors are reported through the model's error event, which also
+      // carries errors raised while rendering; the return value repeats them.
       this.processor.processMessagesWithErrors(tail);
       this.cursor = log.length;
       this.lastProcessed = JSON.stringify(log[log.length - 1]);
@@ -129,32 +128,21 @@ export class LogSession {
     this.noticeCount = 0;
   }
 
+  /**
+   * The surface group re-emits every surface's errors on `model.onError`, and
+   * processing errors without a surface go there directly, so one
+   * subscription sees each error exactly once.
+   */
   private attach(processor: Processor): Processor {
-    this.processorSubscriptions = [
-      processor.model.onError.subscribe((error) => this.report(error)),
-      processor.onSurfaceCreated((surface) => {
-        this.surfaceSubscriptions.set(
-          surface.id,
-          surface.onError.subscribe((error) => this.report(error)),
-        );
-      }),
-      processor.onSurfaceDeleted((id) => {
-        this.surfaceSubscriptions.get(id)?.unsubscribe();
-        this.surfaceSubscriptions.delete(id);
-      }),
-    ];
+    this.errorSubscription = processor.model.onError.subscribe((error) =>
+      this.report(error),
+    );
     return processor;
   }
 
   private detach(): void {
-    for (const subscription of this.processorSubscriptions) {
-      subscription.unsubscribe();
-    }
-    for (const subscription of this.surfaceSubscriptions.values()) {
-      subscription.unsubscribe();
-    }
-    this.processorSubscriptions = [];
-    this.surfaceSubscriptions.clear();
+    this.errorSubscription?.unsubscribe();
+    this.errorSubscription = undefined;
     this.processor.dispose();
   }
 
