@@ -30,6 +30,7 @@
     "@types/react-dom": "^18.3.6",
     "@vitejs/plugin-react": "^6.0.1",
     "cross-env": "^10.1.0",
+    "jsdom": "^31.0.1",
     "prettier": "^3.6.2",
     "rimraf": "^6.1.0",
     "typescript": "^6.0.3",

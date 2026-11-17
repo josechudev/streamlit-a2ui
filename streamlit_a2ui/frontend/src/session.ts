@@ -37,7 +37,7 @@ export type Snapshot = {
 const MAX_NOTICES = 5;
 
 // Bound here so the production build's dropConsole leaves it in place.
-const warn: (...args: unknown[]) => void = console.warn.bind(console);
+export const warn: (...args: unknown[]) => void = console.warn.bind(console);
 
 /** Wraps the action handler's bare payload in the 1.0 wire envelope. */
 export function actionMessage(action: ActionPayload): WireMessage {
