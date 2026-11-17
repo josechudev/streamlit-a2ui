@@ -32,6 +32,9 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "examples" / "basic_app.py"
 STARTUP_SECONDS = 60
 TIMEOUT_MS = 20_000
+# The first script run in a fresh venv imports Streamlit's dependencies for
+# the first time (pandas, pyarrow), which can take well over 20 s.
+FIRST_RENDER_MS = 90_000
 
 
 def _free_port() -> int:
@@ -103,11 +106,13 @@ def app_url(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
 
 def test_action_round_trip(page: Page, app_url: str) -> None:
     page.set_default_timeout(TIMEOUT_MS)
+    # expect() has its own 5 s default; give assertions the same budget.
+    expect.set_options(timeout=TIMEOUT_MS)
     page.goto(app_url)
 
     # Playwright's CSS and role locators pierce the component's open shadow root.
     surface = page.locator(".a2ui-surface")
-    expect(surface.get_by_text("Contact us")).to_be_visible()
+    expect(surface.get_by_text("Contact us")).to_be_visible(timeout=FIRST_RENDER_MS)
     expect(
         page.get_by_text("None yet. Fill in the form and press Send.")
     ).to_be_visible()
