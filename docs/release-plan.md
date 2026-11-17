@@ -22,9 +22,9 @@ Defined in `handoff-m1.md`. Exit gate is the owner's review, including reading t
 ### M2 — Release engineering
 Handoff to write after M1 is merged.
 
-- **CI (GitHub Actions):** ruff, TypeScript strict, frontend tests, pytest; build frontend then wheel and sdist; wheel-content guard (no `*.map`, no CDN URLs, bundle and capabilities JSON present); install the built wheel in a fresh venv and import it.
+- **CI (GitHub Actions):** *started early on branch `m2-ci` (one job: Python 3.13, Streamlit 1.67, plus the browser smoke test); the version matrix below is still to do.* ruff, TypeScript strict, frontend tests, pytest; build frontend then wheel and sdist; wheel-content guard (no `*.map`, no CDN URLs, bundle and capabilities JSON present); install the built wheel in a fresh venv and import it.
 - **Version matrix, kept small:** Python 3.10 and latest; Streamlit at the declared floor and latest. The floor `>=1.51` has never been run. CI either proves it or raises it. Raising the floor is fine; claiming one we haven't tested is not.
-- **Browser smoke test:** one Playwright test that starts `examples/basic_app.py`, clicks the button, and asserts the returned action appears. Only one; this is the guard against a Streamlit release silently breaking CCv2 behaviour we depend on.
+- **Browser smoke test:** *done on `m2-ci` (`e2e/test_basic_app.py`).* one Playwright test that starts `examples/basic_app.py`, clicks the button, and asserts the returned action appears. Only one; this is the guard against a Streamlit release silently breaking CCv2 behaviour we depend on.
 - **Packaging metadata:** single-sourced version, classifiers, project URLs, `LICENSE` and the generated `THIRD_PARTY_LICENSES.txt` in the wheel (no `NOTICE`: no bundled dependency ships one, see `docs/m1-report.md`), sdist that can rebuild the frontend (or a documented decision that it can't).
 - **Release workflow:** tag `v*` → build in CI → publish with PyPI Trusted Publishing (OIDC, no API token stored). Configure the publisher as "pending" on PyPI so the first upload claims the name.
 - **Repo hygiene, minimal:** `CHANGELOG.md`, short `CONTRIBUTING.md` (how to build, the out-of-scope list), `SECURITY.md` pointing to `docs/security.md` with a private reporting route, Dependabot for npm and pip with `@a2ui/*` excluded from auto-bumps (pins are deliberate).

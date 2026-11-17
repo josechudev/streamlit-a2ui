@@ -8,7 +8,7 @@ Personal open-source project. Never add employer code, names, hostnames or data.
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete on branch `m0-spike` (`docs/spike-report.md`). M1 complete on branch `m1-v0.1`, awaiting owner review (`docs/m1-report.md`); the owner's handoff is `docs/handoff-m1.md`. Do not start new work until the owner has reviewed it. Where the handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete on branch `m0-spike` (`docs/spike-report.md`). M1 complete on branch `m1-v0.1`, awaiting owner review (`docs/m1-report.md`); the owner's handoff is `docs/handoff-m1.md`. Do not start new work until the owner has reviewed it. Exception, at the owner's request: M2's CI workflow and Playwright smoke test were started early on branch `m2-ci`, stacked on `m1-v0.1`. Where the handoff and this file disagree, the handoff wins and this file is brought in line.
 
 M1 makes the spike something a stranger can install from source and use. It is not a feature milestone. Do not push, open a PR, or publish.
 
@@ -118,12 +118,17 @@ streamlit_a2ui/frontend/   Vite + React + TS; build output is the asset_dir
   scripts/                 build-time: capabilities, license texts, source-map check
 examples/basic_app.py      form surface, action round trip, scripted agent
 examples/streaming_app.py  fragment streaming plus an action from inside the fragment
-tests/                     pytest
+tests/                     pytest (default run)
+e2e/                       one Playwright browser smoke test (run with `pytest e2e`)
+.github/workflows/ci.yml   CI: build, unit tests, pytest, ruff, browser smoke test
 docs/adr/                  NNNN-title.md
 docs/security.md           security model, overrides, residual risks, npm audit
 docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
 docs/spike-report.md       written at the end of M0
 docs/m1-report.md          written at the end of M1
+docs/release-plan.md       milestones to 0.1.0
+docs/testing-playbook.md   manual and automated test steps
+docs/upstream-issues.md    drafts of issues to file upstream
 ```
 
 ## Commands
@@ -138,6 +143,7 @@ npm run build        # clean + tsc + vite build → build/ (the asset_dir), fail
 npm run dev          # vite build --watch; emits source maps into build/
 npm run typecheck
 npm test             # Vitest unit tests (src/*.test.ts)
+npm run format:check # Prettier, as CI runs it
 
 # python (from repo root)
 uv venv
@@ -148,9 +154,16 @@ uv pip install pytest ruff
 .venv/bin/pytest -q            # needs npm run build first: builds and inspects the wheel
 .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
+# browser smoke test (e2e/, not in the default pytest run)
+uv pip install pytest-playwright
+.venv/bin/playwright install chromium
+.venv/bin/pytest e2e -q          # starts examples/basic_app.py, clicks Send, checks the round trip
+
 # wheel
 uv build
 ```
+
+CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`: Node 24, Python 3.13, Streamlit 1.67. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA.
 
 If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
 
@@ -160,12 +173,12 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 
 - Python: 3.10+, full type hints, `ruff` for lint and format, `pytest`. Public API is exactly what `__init__.py` exports.
 - TypeScript: strict mode, no `any` in our code, function components only. Keep the frontend to a handful of files; it is glue, not an app.
-- Tests: pytest for the Python API and the built wheel's contents; frontend unit tests for the cursor, replay and outbound wrapping. Python never parses message contents, so tests do not either.
+- Tests: pytest for the Python API and the built wheel's contents; one Playwright smoke test in `e2e/` (keep it to one; it guards against Streamlit breaking Components v2 behaviour); frontend unit tests for the cursor, replay and outbound wrapping. Python never parses message contents, so tests do not either.
 - Commits: small, imperative subject, one concern each.
 - Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. One file per ADR in `docs/adr/`.
 
 ## Out of scope — refuse or ask first
 
-Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · CI workflows · a docs site · publishing to PyPI or npm · pushing to a remote.
+Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing to PyPI or npm · pushing to a remote.
 
 If a task seems to need one of these, stop and say so instead of building it.

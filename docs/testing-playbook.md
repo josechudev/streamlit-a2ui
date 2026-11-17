@@ -32,6 +32,10 @@ Rebuild the frontend before installing, and again after any frontend change. Aft
 | A2 | `cd streamlit_a2ui/frontend && npm run typecheck` | No errors |
 | A3 | `.venv/bin/pytest -q` | 17 tests pass. Builds a wheel and checks its contents, so it needs A0's `npm run build` |
 | A4 | `.venv/bin/ruff check . && .venv/bin/ruff format --check .` | No findings |
+| A5 | `cd streamlit_a2ui/frontend && npm run format:check` | "All matched files use Prettier code style!" |
+| A6 | `uv pip install pytest-playwright && .venv/bin/playwright install chromium && .venv/bin/pytest e2e -q` | 1 test passes: starts `examples/basic_app.py`, fills the form, presses Send, sees the reply and the returned action |
+
+CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request. On a failure, the run's `e2e-results` artifact holds a Playwright trace; open it with `.venv/bin/playwright show-trace <file>.zip`.
 
 ## 2. Build and packaging guards (about 5 minutes)
 
