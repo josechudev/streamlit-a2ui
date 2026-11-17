@@ -6,7 +6,7 @@ Personal open-source project. Never add employer code, names, hostnames or data.
 
 ## Current milestone: M1 — harden the spike into v0.1
 
-**Status:** M0 complete on branch `m0-spike` (`docs/spike-report.md`). M1 in progress on branch `m1-v0.1`; the owner's handoff is `docs/handoff-m1.md`. Where the handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete on branch `m0-spike` (`docs/spike-report.md`). M1 complete on branch `m1-v0.1`, awaiting owner review (`docs/m1-report.md`); the owner's handoff is `docs/handoff-m1.md`. Do not start new work until the owner has reviewed it. Where the handoff and this file disagree, the handoff wins and this file is brought in line.
 
 M1 makes the spike something a stranger can install from source and use. It is not a feature milestone. Do not push, open a PR, or publish.
 
