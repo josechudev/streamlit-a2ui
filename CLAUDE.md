@@ -6,7 +6,7 @@ Personal open-source project. Never add employer code, names, hostnames or data.
 
 ## Current milestone: M0 — spike
 
-**Status (2026-11-16): spike done on branch `m0-spike`, awaiting owner review.** Criteria 1, 2, 3, 5 pass. Criterion 4 fails as written (`StreamlitDuplicateElementKey`); `st.fragment(run_every=...)` streams. Open decisions are listed in `docs/spike-report.md`. Do not start M1 until the owner signs off.
+**Status:** M0 complete on branch `m0-spike` (results in `docs/spike-report.md`). ADR-007 to 009 accepted 2026-11-17. Next is M1 per `docs/architecture.md`; until an M1 section replaces this one, do not start new work without the owner.
 
 Prove the architecture before building anything else. Do not add features, docs sites, CI matrices or abstractions during M0.
 
@@ -33,6 +33,8 @@ agent ──A2UI msgs──► log in st.session_state ──data=──► fron
 - **One outbound trigger**, `renderer_message`, set with `setTriggerValue`. Wire it to the processor's action handler and to its outbound renderer-message listener (needed for `callAgentFunction`). Do not use state values for outbound messages.
 - **Frameless.** Streamlit Components v2, `isolate_styles=True`. No v1 API, no iframe, no `postMessage`, no `streamlit-component-lib`.
 - **Theming** is CSS only: map `--st-*` variables onto `--a2ui-*` variables on the component's host element. No theme data crosses from Python.
+- **Streaming across reruns** (ADR-007). One call per keyed component per script run. The documented pattern is the component inside `@st.fragment(run_every=...)` reading a log the agent's stream appends to. No streaming helper in v0.1.
+- **Renderer errors stay in the browser** (ADR-009). Processing errors render as a plain-text notice inside the component; nothing is sent to Python. **Not yet implemented:** the spike only logs them to the console.
 
 Target public API for v0.1, nothing more:
 
@@ -52,8 +54,9 @@ if event:
 |---|---|
 | A2UI spec | 1.0 only. 0.9.x is untested and unsupported |
 | `@a2ui/react`, `@a2ui/web_core` | `0.15.0`, exact pins, no `^` |
-| `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range is `web_core@^0.14.0`, so `package.json` has an `overrides` entry pointing it at the root `web_core` (one deduped copy). Pending owner approval |
-| `dompurify` (via markdown-it, exact `3.4.11`) | `npm audit`: critical advisories. Unresolved, owner decision pending |
+| `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range (`web_core ^0.14.0`) is wrong for 0.15, so `package.json` carries a scoped npm `overrides` entry pointing it at the root `web_core`. Remove when upstream fixes it |
+| `dompurify` (inside `@a2ui/markdown-it`) | Override to the current patched release, exact pin (ADR-008). **Not yet applied in `package.json`.** Upstream pins 3.4.11, which has open advisories. Remove when upstream ships a fix |
+| `zod` | 3.x required by `web_core`; open high advisory with no 3.x fix. Accepted residual risk (ADR-008) |
 | Streamlit | develop on 1.67.x; declare `streamlit>=1.51` until M0 shows a higher floor is needed |
 | React | 18 or 19 (peer range of `@a2ui/react`); use what the template ships |
 | Basic catalog ID | `https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json` |
@@ -62,15 +65,15 @@ API notes that are easy to get wrong:
 
 - Import `A2uiSurface` from the **root** of `@a2ui/react`. There is no `@a2ui/react/v1_0`. Do not import from `/v0_9` or `/v0_8`.
 - Import `MessageProcessor` from `@a2ui/web_core` and the catalog from `@a2ui/web_core/catalogs/basic/v1`.
-- `MessageProcessor`'s `version` option defaults to `'v0.9'`. Pass `'1.0'` (the canonical `ProtocolVersion` / `SpecVersion.V1_0`; `'v1.0'` also normalizes to it).
-- The action handler receives an `ActionPayload`, not a wire message. Wrap it as `{"version": "1.0", "action": payload}` (per `renderer_to_agent.json`). Outbound-listener messages are already full envelopes; send them unchanged.
+- `MessageProcessor`'s `version` option defaults to 0.9. Pass `'1.0'` (`SpecVersion.V1_0`).
+- The action handler receives a bare `ActionPayload`. Wrap it as `{"version":"1.0","action":payload}` before sending. Messages from the outbound listener are already wire-format; send them unchanged.
+- A keyed component can be called once per script run. Streaming is done across reruns, with the component inside `@st.fragment(run_every=...)`. Never vary the key to repaint.
+- `web_core` injects a stylesheet onto the host document. Known, accepted, do not try to patch it out.
+- The catalog derives colors with `light-dark()` and Streamlit exposes no color-scheme variable, so `theme.css` must redefine every derived `--a2ui-*` color token from `--st-*`, not only the base ones.
 - Since 0.15.0 a surface renders nothing until its root component arrives. Render our own minimal waiting state.
 - Basic catalog components are custom elements registered globally on the page. Guard against double registration; never load two versions of the bundle.
 - The published README still shows v0.9 examples. Trust `node_modules/@a2ui/*/` type definitions and CHANGELOG over blog posts or memory; these packages had breaking changes in 0.13, 0.14 and 0.15.
-- 1.0 wire format differs from 0.9. The envelope is `{"version": "1.0", "<messageType>": {...}}` with no `@`; the `@` prefix is on dynamic values (`@path`, `@call`, `@index`). Messages use renderer/agent naming. Take sample payloads from `node_modules/@a2ui/web_core/src/v1_0/schemas/` (including `catalogs/basic/examples/`), not from older tutorials.
-- Streamlit forbids mounting the same key twice in one script run (`StreamlitDuplicateElementKey`). Stream across reruns instead, e.g. `st.fragment(run_every=...)`.
-- `injectBasicCatalogStyles()` also adopts a sheet onto the host page's `document` (`:root{color-scheme: light dark}` plus `--a2ui-*` defaults), so `isolate_styles` does not contain it. The catalog derives colors with `light-dark()` and Streamlit exposes no color-scheme variable, so `theme.css` must redefine every derived `--a2ui-*` color token from `--st-*`.
-- The template's production build drops `console` output; `vite.config.ts` sets `dropConsole: false`. `npm run dev` writes source maps into the publicly served `build/`.
+- 1.0 wire format differs from 0.9: dynamic values use `@path`, `@call`, `@index`; naming is renderer/agent. The envelope is `{"version":"1.0","createSurface":{...}}`. Take sample payloads from the 1.0 spec (`node_modules/@a2ui/web_core/src/v1_0/schemas/`, including `catalogs/basic/examples/`), not from older tutorials.
 
 ## Security rules (non-negotiable)
 
@@ -104,15 +107,13 @@ docs/spike-report.md       written at the end of M0
 
 ## Commands
 
-Prerequisites: uv, Node 24, npm.
-
-Confirmed during M0 (2026-11-16). The system `node` may not be 24; this machine uses `~/.nvm/versions/node/v24.15.0/bin` first on `PATH`.
+Prerequisites: uv, Node 24 (via nvm if the system Node is older), npm. Package only from `npm run build`: `npm run dev` writes source maps into the publicly served `asset_dir`.
 
 ```
 # frontend (from streamlit_a2ui/frontend)
 npm install
 npm run build        # clean + tsc --noEmit + vite build → build/ (the asset_dir)
-npm run dev          # vite build --watch; emits source maps into build/ — never ship that output
+npm run dev          # vite build --watch; emits source maps into build/
 npm run typecheck
 
 # python (from repo root)
@@ -135,7 +136,7 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 - TypeScript: strict mode, no `any` in our code, function components only. Keep the frontend to a handful of files; it is glue, not an app.
 - Tests in M0: one pytest that the component registers and `a2ui_surface` returns `None` with no interaction. Real coverage comes after the spike.
 - Commits: small, imperative subject, one concern each.
-- Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only.
+- Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. ADR-001 to 009 currently live in `docs/architecture.md` §8, not yet split into `docs/adr/`.
 
 ## Out of scope — refuse or ask first
 
