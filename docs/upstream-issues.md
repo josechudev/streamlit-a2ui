@@ -1,15 +1,24 @@
 # Upstream issue drafts
 
-Drafts for the owner to file on [a2ui-project/a2ui](https://github.com/a2ui-project/a2ui) (the repository named in every `@a2ui/*` `package.json`). Not filed yet.
+Drafts for the owner to file on [a2ui-project/a2ui](https://github.com/a2ui-project/a2ui) (the repository named in every `@a2ui/*` `package.json`). Filed or commented on by the owner on 2026-11-17, except issue 4 (see the table).
 
-Checked 2026-11-17 against `@a2ui/react` 0.15.0, `@a2ui/web_core` 0.15.0 and `@a2ui/markdown-it` 0.2.2. Before filing each one: check the latest published versions, search existing issues and pull requests, and follow the repository's contribution instructions. Once filed, link the issue from `docs/security.md`, ADR-008 and the relevant `package.json` override, and record the URL here.
+Checked 2026-11-17 against `@a2ui/react` 0.15.0, `@a2ui/web_core` 0.15.0 and `@a2ui/markdown-it` 0.2.2. Before filing each one: check the latest published versions, search existing issues and pull requests, and follow the repository's contribution instructions. Once filed, link the issue from `docs/security.md`, ADR-008 and the relevant `package.json` override, and record the URL here. `package.json` cannot carry comments, so the overrides there are not annotated.
 
 | # | Package | Title | Filed |
 |---|---|---|---|
-| 1 | `@a2ui/markdown-it` | Peer range `@a2ui/web_core@^0.14.0` conflicts with `@a2ui/react@0.15.0` | no |
-| 2 | `@a2ui/markdown-it` | Exact `dompurify` 3.4.11 pin matches published advisories | no |
-| 3 | `@a2ui/web_core` | Basic catalog always adopts its stylesheet onto `document` | no |
-| 4 | `@a2ui/web_core` | 1.0 `updateComponents` accepts component types the catalog does not define | no |
+| 1 | `@a2ui/markdown-it` | Peer range `@a2ui/web_core@^0.14.0` conflicts with `@a2ui/react@0.15.0` | already reported by someone else as [a2ui-project/a2ui#4059](https://github.com/a2ui-project/a2ui/issues/4059); the owner added our reproduction and workaround in [a comment](https://github.com/a2ui-project/a2ui/issues/4059#issuecomment-6963622021) |
+| 2 | `@a2ui/markdown-it` | Exact `dompurify` 3.4.11 pin matches published advisories | [a2ui-project/a2ui#4278](https://github.com/a2ui-project/a2ui/issues/4278) |
+| 3 | `@a2ui/web_core` | Basic catalog always adopts its stylesheet onto `document` | [a2ui-project/a2ui#4279](https://github.com/a2ui-project/a2ui/issues/4279) |
+| 4 | `@a2ui/web_core` | 1.0 `updateComponents` accepts component types the catalog does not define | **do not file as drafted**; see below |
+
+### Recheck, 2026-11-17 (M3)
+
+Latest on npm: `@a2ui/react` and `@a2ui/web_core` 0.15.0, `@a2ui/markdown-it` 0.2.2, so the drafts still apply to the latest releases. Searched `a2ui-project/a2ui` issues and pull requests, and read `main`:
+
+1. **Duplicate.** [#4059](https://github.com/a2ui-project/a2ui/issues/4059) reports the same peer conflict (open, two comments). On `main` the peer is `workspace:*`, so the next release should carry a 0.15 range. A fix is open upstream: pull request [#4073](https://github.com/a2ui-project/a2ui/pull/4073) bumps `@a2ui/markdown-it` to 0.2.3 and guards against stale peer ranges at publish time; it does not change the `dompurify` pin, so issue 2 is still needed. Add our reproduction and the `overrides` workaround as a comment, or a reaction, and link #4059 from `docs/security.md` and ADR-008.
+2. **Still open, no existing issue.** `main` still pins `dompurify` to exactly `3.4.11` (`typescript/renderers/markdown-it/package.json`). No issue or pull request mentions the advisories. File it; the repository has no `SECURITY.md`, and the advisories are public, so a normal bug report is fine.
+3. **Still open, not reported.** `injectBasicCatalogStyles` on `main` still adopts the sheet onto `document` unconditionally. A related, different leak was fixed: [#3422](https://github.com/a2ui-project/a2ui/issues/3422) (`A2uiLitElement.adoptLightDomStyles()`, fixed by pull request #3666). Mention it in the report so it is not closed as a duplicate.
+4. **Mostly ours, not upstream's.** `@a2ui/web_core` 0.15.0 already rejects unknown component types when the processor is given a `validationConfig` with `allowUnknownElements: false` (exported presets `STRICT_VALIDATION` and `RELAXED_VALIDATION`). Without a `validationConfig` it skips that check on purpose; [#3510](https://github.com/a2ui-project/a2ui/issues/3510), about that default, was closed. Our `session.ts` passes no `validationConfig`, which is why the draft's reproduction stores `NoSuchThing`. `STRICT_VALIDATION` also rejects a missing root, orphans and dangling references, which would break progressive streaming, so the candidate fix is `{ ...RELAXED_VALIDATION, allowUnknownElements: false }`. That is a package change for M3 step 3 (needs a test, and the README limitation and the `CLAUDE.md` note change with it); it is not done yet. Related open upstream issues: [#4018](https://github.com/a2ui-project/a2ui/issues/4018) (component id and type in `onError` reports) and [#2297](https://github.com/a2ui-project/a2ui/issues/2297) (the same gap on the 0.9 path).
 
 Issue 2 is a security issue in a dependency, already public through the advisories. It can be filed as a normal issue; if the repository asks for security reports through a private channel, use that instead.
 

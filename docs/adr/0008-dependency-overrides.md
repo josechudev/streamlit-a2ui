@@ -19,4 +19,4 @@ Scoped npm overrides for the `web_core` peer and for `dompurify` (exact), and ac
 
 - We run a combination upstream has not released together.
 - Remove each override when upstream fixes it.
-- Report both upstream.
+- Report both upstream. Reported: the peer range as [a2ui-project/a2ui#4059](https://github.com/a2ui-project/a2ui/issues/4059) (by someone else; we added our reproduction), the DOMPurify pin as [a2ui-project/a2ui#4278](https://github.com/a2ui-project/a2ui/issues/4278).
