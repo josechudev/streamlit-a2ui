@@ -1,49 +1,54 @@
 import { renderMarkdown } from "@a2ui/markdown-it";
-import {
-  A2uiSurface,
-  MarkdownContext,
-  type ReactCatalogComponent,
-} from "@a2ui/react";
-import type { MessageProcessor, SurfaceModel } from "@a2ui/web_core";
-import { FC, ReactElement, useEffect, useState } from "react";
+import { A2uiSurface, MarkdownContext } from "@a2ui/react";
+import { FC, ReactElement, useSyncExternalStore } from "react";
 
-type Props = { processor: MessageProcessor<ReactCatalogComponent> };
+import type { LogSession, Snapshot } from "./session";
 
-const listSurfaces = (
-  processor: Props["processor"],
-): SurfaceModel<ReactCatalogComponent>[] => [
-  ...processor.getSurfaces().values(),
-];
+/** Plain-text list of processing and surface errors. Never renders HTML. */
+const Notices: FC<{ snapshot: Snapshot }> = ({ snapshot }) => {
+  const { notices, noticeCount } = snapshot;
+  if (noticeCount === 0) return null;
+  const hidden = noticeCount - notices.length;
+  return (
+    <div className="a2ui-notice" role="status">
+      <div className="a2ui-notice-title">
+        {noticeCount === 1 ? "1 A2UI error" : `${noticeCount} A2UI errors`}
+        {hidden > 0 ? ` (showing the last ${notices.length})` : ""}
+      </div>
+      <ul>
+        {notices.map((notice, i) => (
+          <li key={i}>
+            {notice.code}
+            {notice.surfaceId ? ` [${notice.surfaceId}]` : ""}: {notice.message}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
-/** Renders every surface the processor holds, in creation order. */
-const Surfaces: FC<Props> = ({ processor }): ReactElement => {
-  const [surfaces, setSurfaces] = useState(() => listSurfaces(processor));
-
-  useEffect(() => {
-    const sync = (): void => setSurfaces(listSurfaces(processor));
-    const created = processor.onSurfaceCreated(sync);
-    const deleted = processor.onSurfaceDeleted(sync);
-    sync();
-    return () => {
-      created.unsubscribe();
-      deleted.unsubscribe();
-    };
-  }, [processor]);
-
-  if (surfaces.length === 0) {
-    return <div className="a2ui-waiting">Waiting for the agent…</div>;
-  }
+/** Renders every surface the session's processor holds, in creation order. */
+const Surfaces: FC<{ session: LogSession }> = ({ session }): ReactElement => {
+  const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot);
 
   return (
-    <MarkdownContext.Provider value={renderMarkdown}>
-      {surfaces.map((surface) => (
-        // A2uiSurface renders nothing until the root component arrives;
-        // theme.css shows a waiting message while this wrapper is empty.
-        <div key={surface.id} className="a2ui-surface">
-          <A2uiSurface surface={surface} />
-        </div>
-      ))}
-    </MarkdownContext.Provider>
+    <>
+      {!snapshot.hasRoot && (
+        <div className="a2ui-waiting">Waiting for the agent…</div>
+      )}
+      <MarkdownContext.Provider value={renderMarkdown}>
+        {snapshot.surfaces.map((surface) => (
+          // A surface renders nothing until its root component arrives.
+          <div
+            key={`${snapshot.generation}:${surface.id}`}
+            className="a2ui-surface"
+          >
+            <A2uiSurface surface={surface} />
+          </div>
+        ))}
+      </MarkdownContext.Provider>
+      <Notices snapshot={snapshot} />
+    </>
   );
 };
 

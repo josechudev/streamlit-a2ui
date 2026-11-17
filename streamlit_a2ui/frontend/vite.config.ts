@@ -34,8 +34,7 @@ export default defineConfig(() => {
           output: {
             minify: {
               compress: {
-                // Keep console.info: M0 logs MessageProcessor construction.
-                dropConsole: false,
+                dropConsole: true,
                 dropDebugger: true,
               },
             },

@@ -4,21 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run clean && npm run typecheck && npm run build:frontend:production",
+    "build": "npm run clean && npm run typecheck && npm run build:frontend:production && npm run check:build && npm run capabilities && npm run licenses",
     "build:frontend:production": "cross-env NODE_ENV=production vite build",
     "clean": "rimraf build",
     "dev": "cross-env NODE_ENV=development vite build --watch",
-    "format": "prettier --write src/**/*.{ts,tsx} vite.config.ts",
-    "typecheck": "tsc --noEmit"
+    "format": "prettier --write src/**/*.{ts,tsx} scripts/*.ts vite.config.ts",
+    "typecheck": "tsc --noEmit",
+    "capabilities": "node scripts/generate-capabilities.ts",
+    "check:build": "node scripts/check-build.ts",
+    "test": "vitest run",
+    "licenses": "node scripts/third-party-licenses.ts"
   },
   "prettier": {},
   "dependencies": {
-    "@streamlit/component-v2-lib": "^0.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@a2ui/markdown-it": "0.2.2",
     "@a2ui/react": "0.15.0",
     "@a2ui/web_core": "0.15.0",
-    "@a2ui/markdown-it": "0.2.2"
+    "@streamlit/component-v2-lib": "^0.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
@@ -29,11 +33,13 @@
     "prettier": "^3.6.2",
     "rimraf": "^6.1.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vitest": "^5.1.0"
   },
   "overrides": {
     "@a2ui/markdown-it": {
-      "@a2ui/web_core": "$@a2ui/web_core"
+      "@a2ui/web_core": "$@a2ui/web_core",
+      "dompurify": "3.4.18"
     }
   }
 }

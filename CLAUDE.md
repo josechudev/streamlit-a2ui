@@ -4,21 +4,27 @@ Open-source Python package that renders Google's A2UI protocol inside Streamlit 
 
 Personal open-source project. Never add employer code, names, hostnames or data. License: Apache-2.0.
 
-## Current milestone: M0 — spike
+## Current milestone: M1 — harden the spike into v0.1
 
-**Status:** M0 complete on branch `m0-spike` (results in `docs/spike-report.md`). ADR-007 to 009 accepted 2026-11-17. Next is M1 per `docs/architecture.md`; until an M1 section replaces this one, do not start new work without the owner.
+Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-Prove the architecture before building anything else. Do not add features, docs sites, CI matrices or abstractions during M0.
+**Status:** M0 complete on branch `m0-spike` (`docs/spike-report.md`). M1 complete on branch `m1-v0.1`, awaiting owner review (`docs/m1-report.md`); the owner's handoff is `docs/handoff-m1.md`. Do not start new work until the owner has reviewed it. Where the handoff and this file disagree, the handoff wins and this file is brought in line.
 
-M0 passes when all five hold, each shown in `examples/spike_app.py`:
+M1 makes the spike something a stranger can install from source and use. It is not a feature milestone. Do not push, open a PR, or publish.
 
-1. A packaged v2 component mounts `@a2ui/react` in the default shadow root and renders a hard-coded A2UI **1.0** surface from the basic catalog (Column, Text, TextField, Button).
-2. Clicking the button delivers a 1.0 `action` message, with its resolved context, to Python as the return value of `a2ui_surface`.
-3. Appending messages to the log and rerunning updates the surface in place: a half-typed TextField keeps its content and the `MessageProcessor` is not recreated (log its construction to prove it).
-4. Streaming: re-calling the keyed component inside one script run, with a sleep between appended messages, repaints progressively. If it does not, say so, then try `st.fragment(run_every=...)` and report which works.
-5. Toggling Streamlit light/dark changes the surface's colors.
+M1 passes when all nine hold:
 
-When M0 is done, write `docs/spike-report.md`: each criterion pass/fail, exact versions used, anything that contradicted this file. Then stop and wait for review. If a criterion fails, do not work around it with a different architecture; report it.
+1. From a clean clone, the commands in the Commands section build the frontend, install the package and run both examples without edits.
+2. `examples/basic_app.py`: the surface renders, the action comes back once with its context, the scripted reply updates the surface in place, and typed-but-unsubmitted text survives the rerun.
+3. `examples/streaming_app.py`: content appears progressively, and an action fired during or after streaming is received by Python.
+4. A deliberately invalid message in the log produces the in-component notice, does not blank the surfaces already rendered, and returns nothing to Python.
+5. `renderer_capabilities()` output is generated from `web_core`, not hand-written.
+6. One `dompurify` at 3.4.18 in the lockfile and in the bundle.
+7. The wheel has no source maps and no CDN references; the production bundle has no construction log.
+8. All tests and linters pass. Criteria 2, 3 and 4 were exercised in a browser, not inferred from code; otherwise they are marked "needs owner verification" with a click-through checklist.
+9. `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/0001`–`0009`, `docs/notes-m1.md` and `docs/m1-report.md` exist and agree with each other.
+
+When M1 is done, write `docs/m1-report.md` (each criterion with how it was checked, what the step-4 review changed, final dependency versions and `npm audit` output, bundle size before and after, anything in the handoff or this file that was wrong, open problems), then stop and wait for review.
 
 ## Architecture (decided; change only via an ADR)
 
@@ -34,7 +40,7 @@ agent ──A2UI msgs──► log in st.session_state ──data=──► fron
 - **Frameless.** Streamlit Components v2, `isolate_styles=True`. No v1 API, no iframe, no `postMessage`, no `streamlit-component-lib`.
 - **Theming** is CSS only: map `--st-*` variables onto `--a2ui-*` variables on the component's host element. No theme data crosses from Python.
 - **Streaming across reruns** (ADR-007). One call per keyed component per script run. The documented pattern is the component inside `@st.fragment(run_every=...)` reading a log the agent's stream appends to. No streaming helper in v0.1.
-- **Renderer errors stay in the browser** (ADR-009). Processing errors render as a plain-text notice inside the component; nothing is sent to Python. **Not yet implemented:** the spike only logs them to the console.
+- **Renderer errors stay in the browser** (ADR-009). Processing errors render as a plain-text notice inside the component (set via text content) and are logged with `console.warn`; nothing is sent to Python. The return type stays `dict | None`.
 
 Target public API for v0.1, nothing more:
 
@@ -48,16 +54,17 @@ if event:
     st.rerun()
 ```
 
-## Pinned facts (verified 2026-11-16; re-verify before changing)
+## Pinned facts (verified 2026-11-17; re-verify before changing)
 
 | Thing | Value |
 |---|---|
 | A2UI spec | 1.0 only. 0.9.x is untested and unsupported |
-| `@a2ui/react`, `@a2ui/web_core` | `0.15.0`, exact pins, no `^` |
+| `@a2ui/react`, `@a2ui/web_core` | `0.15.0`, exact pins, no `^`. Do not upgrade in M1, even if a newer release is published; note it in the report |
 | `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range (`web_core ^0.14.0`) is wrong for 0.15, so `package.json` carries a scoped npm `overrides` entry pointing it at the root `web_core`. Remove when upstream fixes it |
-| `dompurify` (inside `@a2ui/markdown-it`) | Override to the current patched release, exact pin (ADR-008). **Not yet applied in `package.json`.** Upstream pins 3.4.11, which has open advisories. Remove when upstream ships a fix |
+| `dompurify` (inside `@a2ui/markdown-it`) | `3.4.18`, exact, via a scoped npm `overrides` entry (ADR-008). Upstream pins 3.4.11, which has open advisories fixed by 3.4.17. Remove when upstream ships a fix |
 | `zod` | 3.x required by `web_core`; open high advisory with no 3.x fix. Accepted residual risk (ADR-008) |
-| Streamlit | develop on 1.67.x; declare `streamlit>=1.51` until M0 shows a higher floor is needed |
+| Streamlit | develop on 1.67.x; declare `streamlit>=1.51` |
+| Node | 24 (via nvm if the system Node is older) |
 | React | 18 or 19 (peer range of `@a2ui/react`); use what the template ships |
 | Basic catalog ID | `https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json` |
 
@@ -65,13 +72,18 @@ API notes that are easy to get wrong:
 
 - Import `A2uiSurface` from the **root** of `@a2ui/react`. There is no `@a2ui/react/v1_0`. Do not import from `/v0_9` or `/v0_8`.
 - Import `MessageProcessor` from `@a2ui/web_core` and the catalog from `@a2ui/web_core/catalogs/basic/v1`.
-- `MessageProcessor`'s `version` option defaults to 0.9. Pass `'1.0'` (`SpecVersion.V1_0`).
+- `MessageProcessor`'s `version` option defaults to 0.9. Pass `'1.0'` (`SpecVersion.V1_0`), not `'v1.0'`.
 - The action handler receives a bare `ActionPayload`. Wrap it as `{"version":"1.0","action":payload}` before sending. Messages from the outbound listener are already wire-format; send them unchanged.
 - A keyed component can be called once per script run. Streaming is done across reruns, with the component inside `@st.fragment(run_every=...)`. Never vary the key to repaint.
 - `web_core` injects a stylesheet onto the host document. Known, accepted, do not try to patch it out.
 - The catalog derives colors with `light-dark()` and Streamlit exposes no color-scheme variable, so `theme.css` must redefine every derived `--a2ui-*` color token from `--st-*`, not only the base ones.
 - Since 0.15.0 a surface renders nothing until its root component arrives. Render our own minimal waiting state.
-- Basic catalog components are custom elements registered globally on the page. Guard against double registration; never load two versions of the bundle.
+- Basic catalog components are custom elements registered globally on the page. `web_core` registration is idempotent for one bundle but throws for a second copy, so `index.tsx` claims the page with a global symbol and a later copy renders a notice instead. Never load two versions of the bundle.
+- Surface errors are re-emitted on `processor.model.onError`. Subscribe there only, or each error is reported twice.
+- `@a2ui/web_core` 0.15.0 does not reject unknown component types; a `Text` without `text` is a reliable invalid message for tests.
+- The production build sets `dropConsole: true` (template default). The one `console.warn` we keep goes through a reference bound in `session.ts`, which the minifier leaves alone.
+- The component is registered on first call, not at import: Streamlit resolves `asset_dir` only once its runtime has started, so import-time registration breaks `import streamlit_a2ui` outside `streamlit run`.
+- A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/notes-m1.md`).
 - The published README still shows v0.9 examples. Trust `node_modules/@a2ui/*/` type definitions and CHANGELOG over blog posts or memory; these packages had breaking changes in 0.13, 0.14 and 0.15.
 - 1.0 wire format differs from 0.9: dynamic values use `@path`, `@call`, `@index`; naming is renderer/agent. The envelope is `{"version":"1.0","createSurface":{...}}`. Take sample payloads from the 1.0 spec (`node_modules/@a2ui/web_core/src/v1_0/schemas/`, including `catalogs/basic/examples/`), not from older tutorials.
 
@@ -99,47 +111,61 @@ Expected shape after generation (adjust to what the template actually produces):
 ```
 streamlit_a2ui/            Python package: __init__.py with a2ui_surface(), renderer_capabilities()
 streamlit_a2ui/frontend/   Vite + React + TS; build output is the asset_dir
-examples/spike_app.py      M0 demo
+  src/index.tsx            Streamlit glue: one LogSession and React root per mounted instance
+  src/session.ts           LogSession: processor, cursor, replay, error notices; outbound wrapping
+  src/Surfaces.tsx         surfaces, waiting state, error notice
+  src/theme.css            --st-* → --a2ui-* mapping, notice styles
+  scripts/                 build-time: capabilities, license texts, source-map check
+examples/basic_app.py      form surface, action round trip, scripted agent
+examples/streaming_app.py  fragment streaming plus an action from inside the fragment
 tests/                     pytest
 docs/adr/                  NNNN-title.md
+docs/security.md           security model, overrides, residual risks, npm audit
+docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
 docs/spike-report.md       written at the end of M0
+docs/m1-report.md          written at the end of M1
 ```
 
 ## Commands
 
-Prerequisites: uv, Node 24 (via nvm if the system Node is older), npm. Package only from `npm run build`: `npm run dev` writes source maps into the publicly served `asset_dir`.
+Prerequisites: uv, Node 24 (via nvm if the system Node is older), npm. Package only from `npm run build`: `npm run dev` writes source maps into the publicly served `asset_dir`, and the build check fails on them.
 
 ```
 # frontend (from streamlit_a2ui/frontend)
 npm install
-npm run build        # clean + tsc --noEmit + vite build → build/ (the asset_dir)
+npm run build        # clean + tsc + vite build → build/ (the asset_dir), fail on source maps,
+                     # then write ../renderer_capabilities.json and ../THIRD_PARTY_LICENSES.txt
 npm run dev          # vite build --watch; emits source maps into build/
 npm run typecheck
+npm test             # Vitest unit tests (src/*.test.ts)
 
 # python (from repo root)
 uv venv
 uv pip install -e . --force-reinstall
 uv pip install pytest ruff
-.venv/bin/streamlit run examples/spike_app.py
-.venv/bin/pytest -q
+.venv/bin/streamlit run examples/basic_app.py
+.venv/bin/streamlit run examples/streaming_app.py
+.venv/bin/pytest -q            # needs npm run build first: builds and inspects the wheel
 .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
 # wheel
 uv build
 ```
 
-If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild.
+If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
+
+`renderer_capabilities.json` and `THIRD_PARTY_LICENSES.txt` are generated, git-ignored and shipped in the wheel. Never hand-edit them.
 
 ## Conventions
 
 - Python: 3.10+, full type hints, `ruff` for lint and format, `pytest`. Public API is exactly what `__init__.py` exports.
 - TypeScript: strict mode, no `any` in our code, function components only. Keep the frontend to a handful of files; it is glue, not an app.
-- Tests in M0: one pytest that the component registers and `a2ui_surface` returns `None` with no interaction. Real coverage comes after the spike.
+- Tests: pytest for the Python API and the built wheel's contents; frontend unit tests for the cursor, replay and outbound wrapping. Python never parses message contents, so tests do not either.
 - Commits: small, imperative subject, one concern each.
-- Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. ADR-001 to 009 currently live in `docs/architecture.md` §8, not yet split into `docs/adr/`.
+- Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. One file per ADR in `docs/adr/`.
 
 ## Out of scope — refuse or ask first
 
-Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · publishing to PyPI.
+Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · CI workflows · a docs site · publishing to PyPI or npm · pushing to a remote.
 
 If a task seems to need one of these, stop and say so instead of building it.
