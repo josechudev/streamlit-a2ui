@@ -31,10 +31,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M3 section), `docs/m2-rep
 - **Whether an ADK example ships in the repository** (`examples/adk_agent_app.py`, needing an API key) is the owner's decision after the check. Recommend one way in the report; do not add it without the owner's approval.
 - **The README pass lands before the tag.** PyPI shows the README uploaded with each version and never changes it, so the `0.1.0rc1` page must already say how to install from PyPI, state the pre-1.0 status and show the GIF. The release plan lists the README pass after publishing; this ordering supersedes it.
 - **A published version is final.** PyPI never accepts the same file name twice, even after a deletion. A problem found after the upload is fixed in `0.1.0rc2`; the owner decides whether to yank `rc1`.
-
-### Still open: the owner decides before the tag
-
-- **Author e-mail.** `authors` in `pyproject.toml` includes the owner's e-mail address. It becomes permanently public in the package metadata with `rc1`. Keep it, replace it, or drop the `email` field.
+- **Author e-mail (decided 2026-11-17).** `authors` in `pyproject.toml` keeps the owner's e-mail address, as before. It becomes permanently public in the package metadata with `rc1`.
 
 ## Steps
 
@@ -84,7 +81,6 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
    - A GIF of `examples/basic_app.py`: fill the form, Send, see the reply. Store it under `docs/images/`, keep it small (aim under 2 MB), and check that it is in neither the wheel nor the sdist.
    - PyPI renders the README without the repository around it. Make every link and image absolute (`https://github.com/josechudev/streamlit-a2ui/blob/master/...` for pages, `https://raw.githubusercontent.com/josechudev/streamlit-a2ui/master/...` for the GIF). Check the result with `twine check --strict`.
 6. **Prepare the release commit.**
-   - The owner decides on the author e-mail.
    - `CHANGELOG.md`: date the `[0.1.0rc1]` section and add M3's fixes.
    - The version stays `0.1.0rc1`.
    - Open the pull request when the owner asks. The owner merges it once the four checks are green.

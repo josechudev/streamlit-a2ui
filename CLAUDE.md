@@ -25,7 +25,7 @@ M3 publishes the first release candidate and checks the package against a real a
 7. All tests and linters pass locally and in CI. Nothing in the Architecture or Security sections changed without an ADR and the owner's approval.
 8. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md`, `docs/upstream-issues.md` and `docs/m3-report.md` exist and agree with each other.
 
-The real-agent check runs in a scratch folder outside this repository; the model API key is the owner's and never enters the repository, a note, the report or a logged command line. Open owner decision before the tag: whether to keep the e-mail address in `pyproject.toml`'s `authors`, which becomes permanently public with `rc1`.
+The real-agent check runs in a scratch folder outside this repository; the model API key is the owner's and never enters the repository, a note, the report or a logged command line. The author e-mail in `pyproject.toml`'s `authors` stays as it is (owner's decision, 2026-11-17); it becomes public in the package metadata with `rc1`.
 
 The result goes in `docs/m3-report.md`; then stop for the owner's review.
 
