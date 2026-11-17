@@ -43,26 +43,67 @@ from streamlit_a2ui import a2ui_surface
 
 CATALOG = "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
 
+
 def initial_messages():
     return [
-        {"version": "1.0", "createSurface": {"surfaceId": "contact", "catalogId": CATALOG}},
-        {"version": "1.0", "updateComponents": {"surfaceId": "contact", "components": [
-            {"id": "root", "component": "Column", "children": ["name_field", "send", "reply"]},
-            {"id": "name_field", "component": "TextField", "label": "Name",
-             "value": {"@path": "/name"}},
-            {"id": "send", "component": "Button", "child": "send_label", "variant": "primary",
-             "action": {"event": {"name": "send_message",
-                                  "context": {"name": {"@path": "/name"}}}}},
-            {"id": "send_label", "component": "Text", "text": "Send"},
-            {"id": "reply", "component": "Text", "text": "The agent's reply will appear here."},
-        ]}},
+        {
+            "version": "1.0",
+            "createSurface": {"surfaceId": "contact", "catalogId": CATALOG},
+        },
+        {
+            "version": "1.0",
+            "updateComponents": {
+                "surfaceId": "contact",
+                "components": [
+                    {
+                        "id": "root",
+                        "component": "Column",
+                        "children": ["name_field", "send", "reply"],
+                    },
+                    {
+                        "id": "name_field",
+                        "component": "TextField",
+                        "label": "Name",
+                        "value": {"@path": "/name"},
+                    },
+                    {
+                        "id": "send",
+                        "component": "Button",
+                        "child": "send_label",
+                        "variant": "primary",
+                        "action": {
+                            "event": {
+                                "name": "send_message",
+                                "context": {"name": {"@path": "/name"}},
+                            }
+                        },
+                    },
+                    {"id": "send_label", "component": "Text", "text": "Send"},
+                    {
+                        "id": "reply",
+                        "component": "Text",
+                        "text": "The agent's reply will appear here.",
+                    },
+                ],
+            },
+        },
     ]
+
 
 def scripted_agent(event):
     name = event["action"]["context"].get("name") or "there"
-    return [{"version": "1.0", "updateComponents": {"surfaceId": "contact", "components": [
-        {"id": "reply", "component": "Text", "text": f"Thanks, {name}!"},
-    ]}}]
+    return [
+        {
+            "version": "1.0",
+            "updateComponents": {
+                "surfaceId": "contact",
+                "components": [
+                    {"id": "reply", "component": "Text", "text": f"Thanks, {name}!"},
+                ],
+            },
+        }
+    ]
+
 
 log = st.session_state.setdefault("a2ui_log", initial_messages())
 event = a2ui_surface(log, key="contact")
@@ -100,6 +141,7 @@ def surface():
         handle(event)  # only this fragment reran: handle the event here
         st.rerun(scope="fragment")
 
+
 surface()
 ```
 
@@ -122,7 +164,13 @@ Renders the A2UI 1.0 messages in `messages` and returns at most one renderer-to-
 Returns the renderer's A2UI capabilities, to pass to your agent (for example in A2A metadata). It is generated from `@a2ui/web_core` when the frontend is built:
 
 ```python
-{"1.0": {"supportedCatalogIds": ["https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"]}}
+{
+    "1.0": {
+        "supportedCatalogIds": [
+            "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
+        ]
+    }
+}
 ```
 
 ## Limitations
