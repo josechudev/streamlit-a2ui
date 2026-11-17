@@ -214,7 +214,7 @@ gh workflow run release.yml --ref <branch>
 
 CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`), and Python 3.13 with the latest Streamlit (`>=1.67`). A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check`, and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the e2e test against it. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag; only the owner creates tags.
 
-If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
+If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. Before building a wheel locally, delete the setuptools cache `build/` at the repo root: it keeps old bundles and setuptools ships them (CI checkouts are clean; `tests/test_wheel.py` fails on a second bundle). After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
 
 `renderer_capabilities.json` and `THIRD_PARTY_LICENSES.txt` are generated, git-ignored and shipped in the wheel. Never hand-edit them.
 

@@ -121,4 +121,5 @@ Then run parts 0 and 1 inside `/tmp/a2ui-clean`, and start each example once (B1
 | A `js=` or `css=` pattern matches more than one file | `npm run clean`, then `npm run build` |
 | `renderer_capabilities()` raises `FileNotFoundError` | Run `npm run build`; the JSON file is generated, not committed |
 | pytest fails building the wheel | Run `npm run build` first |
+| `test_wheel_ships_the_frontend_bundle` fails, or a local wheel holds more than one `index-*.js` | Delete the setuptools cache `build/` at the repo root (not `streamlit_a2ui/frontend/build/`); it keeps old bundles and setuptools copies them into the wheel |
 | Port 8501 in use | `.venv/bin/streamlit run examples/basic_app.py --server.port 8502` |
