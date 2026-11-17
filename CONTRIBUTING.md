@@ -71,14 +71,23 @@ Releases are published from GitHub Actions with [PyPI Trusted Publishing](https:
 
 ### One-time setup (maintainer)
 
+Done for this repository after M2; kept here as a record and for forks.
+
 1. On PyPI, add a pending publisher (Account settings → Publishing → Add a new pending publisher → GitHub): project name `streamlit-a2ui`, owner `josechudev`, repository `streamlit-a2ui`, workflow `release.yml`, environment `pypi`. The first successful upload creates the project and claims the name.
 2. On GitHub, create the environment `pypi` (Settings → Environments → New environment) and add yourself as a required reviewer, so every publish waits for an approval. Optionally restrict it to tags matching `v*`.
 3. Enable private vulnerability reporting (Settings → Code security), which `SECURITY.md` points to.
+4. Rulesets (Settings → Rules): `master` with no deletion or force-push, pull requests required, and the four CI checks required (`Test (py3.10 / streamlit floor)`, `Test (py3.13 / streamlit latest)`, `Build wheel and sdist`, `Installed wheel smoke test`); and `release tag` on `refs/tags/v*` with no deletion, update or force-push. Neither has a bypass.
+5. Restrict the `pypi` environment to tags matching `v*` and do not let administrators bypass its reviewer.
 
 ### Each release
 
 1. Set `version` in `pyproject.toml` (the only place it is defined) and move the `Unreleased` entries in `CHANGELOG.md` under the new version with today's date.
 2. Merge to `master` and wait for CI to pass.
 3. Optional dry run: Actions → Release → Run workflow. It builds and checks the wheel and sdist and stops before publishing.
-4. Tag and push: `git tag v<version>` on the merge commit, then `git push origin v<version>`. The tag must equal the version, for example `v0.1.0rc1` for `0.1.0rc1`; the workflow refuses a mismatch.
-5. Approve the `pypi` environment when the workflow asks. Then install the published version in a fresh venv and run both examples.
+4. Tag and push: `git tag -a v<version> -m v<version>` on the commit the dry run built, then `git push origin v<version>`. The tag must equal the version, for example `v0.1.0rc1` for `0.1.0rc1`; the workflow refuses a mismatch. A pending publisher does not reserve the name on PyPI, so check it is still free before the first release.
+5. Approve the `pypi` environment when the workflow asks. Then install the published version in a fresh venv, outside the checkout and with no package cache, and run both examples. A pre-release needs `pip install --pre` or an exact pin.
+
+### When a release fails
+
+- **Before anything reached PyPI** (the build or the publish job failed): fix it on `master`, then temporarily disable the `release tag` ruleset, delete the tag locally and on GitHub, re-create it on the fixed commit, re-enable the ruleset and push the tag again.
+- **After an upload:** never re-tag. PyPI never accepts the same file name twice, even after a deletion. Fix it in the next version (for example `0.1.0rc2`), and yank the broken one on PyPI if users should not get it.
