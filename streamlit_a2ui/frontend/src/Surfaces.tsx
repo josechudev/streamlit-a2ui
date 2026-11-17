@@ -8,6 +8,7 @@ import type { LogSession, Snapshot } from "./session";
 const Notices: FC<{ snapshot: Snapshot }> = ({ snapshot }) => {
   const { notices, noticeCount } = snapshot;
   if (noticeCount === 0) return null;
+  // Notices are numbered from the last replay; older ones have been dropped.
   const hidden = noticeCount - notices.length;
   return (
     <div className="a2ui-notice" role="status">
@@ -17,7 +18,7 @@ const Notices: FC<{ snapshot: Snapshot }> = ({ snapshot }) => {
       </div>
       <ul>
         {notices.map((notice, i) => (
-          <li key={i}>
+          <li key={hidden + i}>
             {notice.code}
             {notice.surfaceId ? ` [${notice.surfaceId}]` : ""}: {notice.message}
           </li>
