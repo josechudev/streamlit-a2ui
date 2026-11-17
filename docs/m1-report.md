@@ -112,7 +112,7 @@ These are proposals, not work done.
 | # | Item | Decision |
 |---|---|---|
 | — | `dropConsole` | Keep `dropConsole: true`; our one `console.warn` goes through the bound reference in `session.ts` |
-| 2 | Render-time exceptions | Follow Streamlit's own pattern. Streamlit's frontend uses one small class component, `ErrorBoundary` (`frontend/lib/src/components/shared/ErrorBoundary/ErrorBoundary.tsx`: `getDerivedStateFromError` plus `componentDidCatch`, renders an error element). React's documentation offers the same two choices: write a single `ErrorBoundary` class and reuse it, or use the `react-error-boundary` package. `@a2ui/react` 0.15.0 has no boundary of its own. Implementation, and the `CLAUDE.md` convention exception it needs, are not done yet |
+| 2 | Render-time exceptions | Follow Streamlit's own pattern. Streamlit's frontend uses one small class component, `ErrorBoundary` (`frontend/lib/src/components/shared/ErrorBoundary/ErrorBoundary.tsx`: `getDerivedStateFromError` plus `componentDidCatch`, renders an error element). React's documentation offers the same two choices: write a single `ErrorBoundary` class and reuse it, or use the `react-error-boundary` package. `@a2ui/react` 0.15.0 has no boundary of its own. Deferred to M2, with the `CLAUDE.md` convention exception it needs |
 | 3 | Second outbound message per rerun | Watch for it during M3's real-agent check before changing anything; a fix changes the return type and needs an ADR |
 | 4 | Bundle whitespace | Try `codegen.removeWhitespace` in M2 |
 | 5 | Lazy registration | Accepted. M2's CI on the Streamlit floor and latest guards against a registration-timing change |
