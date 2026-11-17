@@ -1,6 +1,6 @@
 # streamlit-a2ui — Release plan to 0.1.0
 
-Status: 2026-11-17. M1 merged to `master` (`docs/m1-report.md`). M2 is complete on branch `m2-release` and waiting for the owner's review (`docs/m2-report.md`); its CI has not yet run on GitHub, because the branch has not been pushed.
+Status: 2026-11-17. M1 and M2 merged to `master` (`docs/m1-report.md`, `docs/m2-report.md`; M2 as PR #4, CI green). M3 started: `docs/handoff-m3.md`. The repository went public at the start of M3 (see M4).
 Goal: `pip install streamlit-a2ui` works for a stranger, and the right people know it exists. Nothing else.
 
 Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0.15.0 and `@a2ui/markdown-it` still 0.2.2 (no 1.0-aligned release yet).
@@ -12,15 +12,15 @@ Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0
 | M1 | Harden spike into v0.1 | `docs/m1-report.md` reviewed; owner clicks through both examples; merged to `master` | Claude Code, then owner |
 | M2 | Release engineering | CI green on a PR; a wheel built by CI installs and runs in a clean venv on the Streamlit floor and on latest | Claude Code |
 | M3 | Release candidate + real-agent check | `0.1.0rc1` on PyPI; installed from PyPI in a fresh venv; one real ADK agent drove a surface end to end | Owner + Claude Code |
-| M4 | 0.1.0 public | Repo public, `0.1.0` on PyPI, GitHub release, listed on A2UI and Streamlit galleries | Owner |
+| M4 | 0.1.0 public | `0.1.0` on PyPI, GitHub release, listed on A2UI and Streamlit galleries | Owner |
 
 Estimated effort with the owner's evenings: M2 one or two sessions; M3 one session plus fixes; M4 an hour plus waiting for listing PRs.
 
 ### M1 — Harden the spike (done, merged 2026-11-17)
 Defined in `handoff-m1.md`. Exit gate is the owner's review, including reading the frontend diff: it is the part most likely to hide spike-era shortcuts.
 
-### M2 — Release engineering
-Handoff: `docs/handoff-m2.md`. Branch: `m2-release`. Result: `docs/m2-report.md`.
+### M2 — Release engineering (done, merged 2026-11-17 as PR #4)
+Handoff: `docs/handoff-m2.md`. Result: `docs/m2-report.md`.
 
 - **CI (GitHub Actions):** *done: two test legs, a `package` job (wheel and sdist built once, sdist-without-Node comparison, `twine check`) and a `wheel-smoke` job (installed wheel, browser test).* ruff, TypeScript strict, frontend tests, pytest; build frontend then wheel and sdist; wheel-content guard (no `*.map`, no CDN URLs, bundle and capabilities JSON present); install the built wheel in a fresh venv and import it.
 - **Version matrix, kept small:** Python 3.10 and latest; Streamlit at the declared floor and latest. *Done: 1.51–1.58 fail, so the floor is now `>=1.59` (`docs/m2-report.md`).* Raising the floor is fine; claiming one we haven't tested is not.
@@ -30,11 +30,13 @@ Handoff: `docs/handoff-m2.md`. Branch: `m2-release`. Result: `docs/m2-report.md`
 - **Repo hygiene, minimal:** *done.* `CHANGELOG.md`, short `CONTRIBUTING.md` (how to build, the out-of-scope list), `SECURITY.md` pointing to `docs/security.md` with a private reporting route, Dependabot for npm and pip with `@a2ui/*` excluded from auto-bumps (pins are deliberate).
 - **Error boundary (owner decision after M1):** *done.* follow Streamlit's own pattern, one small class `ErrorBoundary` around each surface, so an exception while React renders one surface shows a plain-text notice (and the bound `console.warn`) instead of blanking the whole component. Needs a one-line exception to the "function components only" convention in `CLAUDE.md`. Add a Vitest or Playwright check that a throwing surface leaves the others rendered.
 - **Bundle whitespace:** *done, kept: JS 955,724 → 764,458 bytes raw, 257,336 → 234,480 gzip.* Try `codegen.removeWhitespace` in the Vite build. Record raw and gzip size before and after; keep it only if the bundle still passes every test and the browser smoke test.
-- **The M2 handoff must also:** *done, except the publishing ban, which the owner kept for M2 and lifts when M3 starts.* Refresh `docs/architecture.md` (it still describes the end of M0; fold in M1's findings and the ADRs); lift the `CLAUDE.md` out-of-scope ban that M3 needs (publishing to PyPI; the CI ban was lifted with the CI workflow); keep every other ban.
+- **The M2 handoff must also:** *done. The publishing ban, kept for M2, was narrowed when M3 started: only `release.yml` on a `v*` tag the owner pushes and approves.* Refresh `docs/architecture.md` (it still describes the end of M0; fold in M1's findings and the ADRs); lift the `CLAUDE.md` out-of-scope ban that M3 needs (publishing to PyPI; the CI ban was lifted with the CI workflow); keep every other ban.
 
 Not in M2: docs site, coverage badges, multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish.
 
 ### M3 — Release candidate and real-agent check
+Handoff: `docs/handoff-m3.md`. Result: `docs/m3-report.md`. The handoff moves the README pass before the tag, because PyPI keeps the README uploaded with each version.
+
 - **Upstream reports first** (so the README can link them): the `@a2ui/markdown-it` peer range and DOMPurify pin; `injectBasicCatalogStyles()` writing page-wide styles; `web_core` accepting unknown component types. Drafts in `docs/upstream-issues.md`. Link the issues from `docs/security.md` and ADR-008.
 - **Real-agent check, outside the package.** Every payload so far was hand-written. In a scratch repo (personal machine, no employer code), build a minimal Google ADK agent with `a2ui-agent-sdk`, feed it `renderer_capabilities()`, and drive a surface through one action round trip and one streamed response. Record what broke. Fix bugs in the package; do not add an adapter. Whether a cleaned version ships as `examples/adk_agent_app.py` (needs an API key) is a decision for then.
   - Also watch for a second renderer-to-agent message replacing the first before a rerun (two quick clicks, or an action during a `callAgentFunction`). Record whether it happens; fixing it changes the return type and needs an ADR, so do not fix it in M3.
@@ -42,7 +44,7 @@ Not in M2: docs site, coverage badges, multi-OS matrix, pre-commit frameworks, r
 - **README pass:** a GIF of the basic example, install from PyPI, status badge text that says pre-1.0.
 
 ### M4 — 0.1.0 public
-- Flip the repo to public (only now: the history then contains a working package, not a half-built spike).
+- ~~Flip the repo to public.~~ *Done early, at the start of M3: GitHub Free has no environment reviewers on private repositories, and the `pypi` environment needs one. A full-history scan for secrets and employer data was clean first.*
 - Tag `v0.1.0`; GitHub release notes from `CHANGELOG.md`, stating A2UI 1.0 only, the Streamlit floor, the known risks, and the pinned 0.x renderer packages.
 - **Listings:**
   - A2UI ecosystem renderers page: PR adding a row (platform: Streamlit / Python; v1.0 only). Check the current repo's contribution instructions; the listing has moved between repos before.
