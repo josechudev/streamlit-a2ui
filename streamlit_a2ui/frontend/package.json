@@ -33,7 +33,8 @@
   },
   "overrides": {
     "@a2ui/markdown-it": {
-      "@a2ui/web_core": "$@a2ui/web_core"
+      "@a2ui/web_core": "$@a2ui/web_core",
+      "dompurify": "3.4.18"
     }
   }
 }
