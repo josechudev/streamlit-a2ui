@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # The frontend's pins are deliberate: @a2ui/* are exact pins and dompurify is
+  # held by an npm override (see docs/security.md and ADR-008). Upgrade them by hand.
+  - package-ecosystem: npm
+    directory: /streamlit_a2ui/frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "@a2ui/*"
+      - dependency-name: "dompurify"
+
+  # The Streamlit floor in pyproject.toml is set by CI's version matrix, so only
+  # bump it when a new release falls outside the range. increase-if-necessary does that.
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    versioning-strategy: increase-if-necessary
+
+  # Actions are pinned to commit SHAs. Dependabot updates the SHA and the version comment.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
