@@ -40,23 +40,31 @@ def _free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-def _wait_healthy(url: str, server: subprocess.Popen[bytes]) -> None:
+def _wait_healthy(url: str, server: subprocess.Popen[bytes], log: Path) -> None:
     deadline = time.monotonic() + STARTUP_SECONDS
     while time.monotonic() < deadline:
         if server.poll() is not None:
-            pytest.fail(f"streamlit exited with code {server.returncode}")
+            pytest.fail(
+                f"streamlit exited with code {server.returncode}:\n"
+                + log.read_text(errors="replace")[-4000:]
+            )
         try:
             with urllib.request.urlopen(f"{url}/_stcore/health", timeout=1) as resp:
                 if resp.status == 200:
                     return
         except OSError:
             time.sleep(0.5)
-    pytest.fail(f"streamlit did not become healthy within {STARTUP_SECONDS}s")
+    pytest.fail(
+        f"streamlit did not become healthy within {STARTUP_SECONDS}s:\n"
+        + log.read_text(errors="replace")[-4000:]
+    )
 
 
 @pytest.fixture(scope="module")
-def app_url() -> Iterator[str]:
+def app_url(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
     port = _free_port()
+    log = tmp_path_factory.mktemp("streamlit") / "server.log"
+    log_file = log.open("wb")
     server = subprocess.Popen(
         [
             sys.executable,
@@ -74,12 +82,12 @@ def app_url() -> Iterator[str]:
             "false",
         ],
         cwd=ROOT,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=log_file,
+        stderr=subprocess.STDOUT,
     )
     url = f"http://127.0.0.1:{port}"
     try:
-        _wait_healthy(url, server)
+        _wait_healthy(url, server, log)
         yield url
     finally:
         server.terminate()
@@ -87,6 +95,7 @@ def app_url() -> Iterator[str]:
             server.wait(timeout=10)
         except subprocess.TimeoutExpired:
             server.kill()
+        log_file.close()
 
 
 def test_action_round_trip(page: Page, app_url: str) -> None:
