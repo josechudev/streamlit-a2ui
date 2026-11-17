@@ -10,6 +10,28 @@ updates:
     ignore:
       - dependency-name: "@a2ui/*"
       - dependency-name: "dompurify"
+      # Major versions are decisions, not routine bumps: React 19 needs a full
+      # browser check, and @types/node follows the Node major CI runs (24).
+      # Remove an entry when you decide to take that major.
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+    # react, react-dom and their types only install together (their peer
+    # ranges must match), so they always come as one pull request.
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
 
   # The Streamlit floor in pyproject.toml is set by CI's version matrix, so only
   # bump it when a new release falls outside the range. increase-if-necessary does that.
