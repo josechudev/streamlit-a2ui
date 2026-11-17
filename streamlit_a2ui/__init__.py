@@ -39,7 +39,7 @@ def _ignore() -> None:
 
 
 def renderer_capabilities() -> dict[str, Any]:
-    """Return this renderer's A2UI renderer capabilities.
+    """Return the A2UI capabilities of this renderer.
 
     Pass the result to your agent (for example as A2A metadata) so it knows
     which protocol versions and catalogs the surface can render. The content
