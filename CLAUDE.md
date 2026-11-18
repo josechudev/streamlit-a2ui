@@ -105,7 +105,7 @@ API notes that are easy to get wrong:
 - Since 0.15.0 a surface renders nothing until its root component arrives. Render our own minimal waiting state.
 - Basic catalog components are custom elements registered globally on the page. `web_core` registration is idempotent for one bundle but throws for a second copy, so `index.tsx` claims the page with a global symbol and a later copy renders a notice instead. Never load two versions of the bundle.
 - Surface errors are re-emitted on `processor.model.onError`. Subscribe there only, or each error is reported twice.
-- `@a2ui/web_core` 0.15.0 does not reject unknown component types; a `Text` without `text` is a reliable invalid message for tests.
+- `@a2ui/web_core` 0.15.0 rejects unknown component types only when the processor has a `validationConfig`. `session.ts` passes `VALIDATION` (`RELAXED_VALIDATION` with `allowUnknownElements: false`): relaxed so surfaces can stream in out of order, strict about types. Never pass `STRICT_VALIDATION`: it rejects a surface whose root has not arrived yet. A `Text` without `text`, or an unknown component type, is a reliable invalid message for tests.
 - The production build sets `dropConsole: true` (template default). The one `console.warn` we keep goes through a reference bound in `session.ts`, which the minifier leaves alone.
 - The component is registered on first call, not at import: Streamlit resolves `asset_dir` only once its runtime has started, so import-time registration breaks `import streamlit_a2ui` outside `streamlit run`.
 - A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/notes-m1.md`).
@@ -259,6 +259,19 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 - Tests: pytest for the Python API and the built wheel's contents; one Playwright smoke test in `e2e/` (keep it to one; it guards against Streamlit breaking Components v2 behaviour); frontend unit tests for the cursor, replay, outbound wrapping and the error boundary. Python never parses message contents, so tests do not either.
 - Commits: small, imperative subject, one concern each.
 - Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. One file per ADR in `docs/adr/`.
+
+## Subagents (local, optional)
+
+The owner's machine has four project subagents in `.claude/agents/` of the main checkout. `.claude/` is local and never committed, so other contributors don't have them. Use them only when the owner asks for subagents; otherwise do the work inline.
+
+| Agent | Model | Use for |
+|---|---|---|
+| `tester` | sonnet | Run checks and report exact failures: npm typecheck, Vitest, Prettier, build, pytest, ruff, e2e, wheel and sdist. Never edits code |
+| `ts-dev` | sonnet | Any change under `streamlit_a2ui/frontend` (glue, tests, build config, theme CSS) |
+| `python-dev` | sonnet | Packaging, workflows, release, pytest design: work that needs investigation |
+| `python-dev-quick` | haiku | Small, fully specified Python or metadata edits in one or two files; no frontend |
+
+Give a subagent the exact files, the change and the acceptance check. Review its diff and rerun the checks yourself before reporting a result.
 
 ## Out of scope — refuse or ask first
 

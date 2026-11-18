@@ -1,6 +1,7 @@
 import type { ReactCatalogComponent } from "@a2ui/react";
 import {
   MessageProcessor,
+  RELAXED_VALIDATION,
   type A2uiErrorPayload,
   type ActionPayload,
   type Subscription,
@@ -45,6 +46,18 @@ export function actionMessage(action: ActionPayload): WireMessage {
 }
 
 /**
+ * Validation rules for agent messages. Relaxed, so a surface can stream in:
+ * components may arrive before their root or their parent, and may refer to
+ * children that have not arrived yet. Strict about component and function
+ * types: without a `validationConfig`, `web_core` stores a component type the
+ * catalog does not define and renders nothing for it, with no error.
+ */
+export const VALIDATION = Object.freeze({
+  ...RELAXED_VALIDATION,
+  allowUnknownElements: false,
+});
+
+/**
  * A 1.0 processor for the basic catalog. Actions are wrapped into wire
  * messages; outbound-listener messages (callAgentFunction, ...) are already
  * wire messages and are passed through unchanged.
@@ -55,7 +68,11 @@ export function createProcessor(
   return new MessageProcessor<ReactCatalogComponent>(
     [basicCatalog],
     (action) => send(actionMessage(action)),
-    { version: "1.0", outboundListener: (message) => send(message) },
+    {
+      version: "1.0",
+      outboundListener: (message) => send(message),
+      validationConfig: VALIDATION,
+    },
   );
 }
 

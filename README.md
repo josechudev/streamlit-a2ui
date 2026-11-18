@@ -178,7 +178,6 @@ Returns the renderer's A2UI capabilities, to pass to your agent (for example in 
 - A2UI 1.0 and the basic catalog only. No custom or inline catalogs.
 - One renderer-to-agent message per rerun. A second message produced before the app reruns can replace the first; how often that happens in practice has not been measured.
 - Errors stay in the browser. A message the renderer rejects, or an exception while one surface renders, shows a plain-text notice inside the component and a `console.warn`, and the other surfaces stay rendered; nothing is returned to Python, so your agent cannot see validation errors yet.
-- Unknown component types are not reported as errors by `@a2ui/web_core` 0.15.0.
 - The full log is sent to the browser on every rerun.
 - Text typed into a surface but not sent is lost if the component remounts or the log is replaced.
 - Streaming repaints at the fragment's interval, not per message.
