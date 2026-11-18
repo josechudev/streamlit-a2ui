@@ -4,30 +4,46 @@ Open-source Python package that renders Google's A2UI protocol inside Streamlit 
 
 Personal open-source project. Never add employer code, names, hostnames or data. License: Apache-2.0.
 
-## Current milestone: M3 — release candidate and real-agent check
+## Current milestone: M4 — 0.1.0 public
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 is defined in `docs/handoff-m3.md`; its work is done and `docs/m3-report.md` waits for the owner's review. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 merged on 2026-11-18 as PRs #10–#15 (`docs/m3-report.md`). M4 is defined in `docs/handoff-m4.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
-Push or open a pull request only when the owner asks. Work on a branch cut from `master`; `master` is protected, so changes land through a pull request with the four CI checks green. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from `origin/master` tracks it.
+Push or open a pull request only when the owner asks. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from a remote branch tracks it.
 
-**Publishing.** M3 publishes `0.1.0rc1`, and it happens only one way: `release.yml`, triggered by a `v*` tag that the owner creates and pushes, publishing after the owner approves the `pypi` environment. Claude Code never creates or pushes a tag, never uploads to PyPI or TestPyPI, never runs `twine upload` or `uv publish`, never creates a GitHub release, and never runs `release.yml` except as a `workflow_dispatch` dry run the owner asks for.
+**Branches: gitflow (owner's decision, 2026-11-18; details in `CONTRIBUTING.md`).** `master` holds released code only, and every `v*` tag is on a `master` merge commit. `develop` is the integration branch. Name branches by kind:
+- `feature/<topic>`: cut from `develop`, pull request into `develop`. All ordinary work, docs included.
+- `release/<version>` (for example `release/0.1.0`): cut from `develop`; only the version bump, the dated CHANGELOG section and release fixes; pull request into `master`; after the tag, `master` is merged back into `develop` by pull request.
+- `hotfix/<version>` (for example `hotfix/0.1.1`): cut from `master`; the fix with its test, the version bump and the CHANGELOG section; pull request into `master`; after the tag, merged back into `develop`.
 
-M3 publishes the first release candidate and checks the package against a real agent. It passes when all eight hold:
+Every merge goes through a pull request with the four CI checks green; no direct pushes to `master` or `develop`.
 
-1. Upstream reports, as rechecked on 2026-11-17 (`docs/upstream-issues.md`): issues 2 and 3 are filed by the owner; issue 1 is the existing [#4059](https://github.com/a2ui-project/a2ui/issues/4059), which the owner comments on instead; issue 4 is not filed, and the report records whether the package now passes a `validationConfig` that rejects unknown component types. The URLs are in `docs/upstream-issues.md` and linked from `docs/security.md` and ADR-008 (issues 1 and 2) and from `docs/security.md` (issue 3).
-2. A minimal ADK agent built with `a2ui-agent-sdk`, outside this repository, received `renderer_capabilities()` and drove a surface rendered by `a2ui_surface` in a browser through one action round trip and one streamed response. The report lists the versions used and what broke. Each package bug found is fixed with a test. No adapter or agent dependency was added to the package.
-3. The report records whether a second renderer-to-agent message replaced the first before a rerun, with the steps used. The behaviour is unchanged, and the README states the measured result.
-4. The README says how to install from PyPI, states the pre-1.0 status, shows a GIF of the basic example, and renders correctly on PyPI with working absolute links. The GIF is in neither the wheel nor the sdist.
-5. `streamlit-a2ui 0.1.0rc1` is on PyPI, published by `release.yml` from tag `v0.1.0rc1`. The owner pushed the tag and approved the `pypi` environment. The files on PyPI match the run's artifact by SHA-256. Claude Code created no tag, uploaded nothing and created no GitHub release.
-6. In a fresh environment outside the checkout, `0.1.0rc1` installed from PyPI imports from `site-packages`, and both examples pass playbook parts 3 and 4 in a browser, or are marked "needs owner verification".
-7. All tests and linters pass locally and in CI. Nothing in the Architecture or Security sections changed without an ADR and the owner's approval.
-8. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md`, `docs/upstream-issues.md` and `docs/m3-report.md` exist and agree with each other.
+**Publishing.** M4 publishes `0.1.0` (and, during the watch week, bug-fix `0.1.x` releases), and it happens only one way: `release.yml`, triggered by a `v*` tag that the owner creates and pushes, publishing after the owner approves the `pypi` environment. Claude Code never creates or pushes a tag, never uploads to PyPI or TestPyPI, never runs `twine upload` or `uv publish`, and never runs `release.yml` except as a `workflow_dispatch` dry run the owner asks for.
 
-The real-agent check runs in a scratch folder outside this repository; the model API key is the owner's and never enters the repository, a note, the report or a logged command line. The author e-mail in `pyproject.toml`'s `authors` stays as it is (owner's decision, 2026-11-17); it becomes public in the package metadata with `rc1`.
+**Public actions.** Claude Code drafts the GitHub release notes, the listing pull requests and the posts; the owner creates, opens and publishes them. Claude Code creates a GitHub release, opens a pull request in another repository, or posts on the Streamlit forum or GitHub Discussions only when the owner explicitly asks for that action in the same session, and never signs an agreement (such as Google's CLA) for the owner.
 
-The result goes in `docs/m3-report.md`; then stop for the owner's review.
+**Owner decisions, 2026-11-18.** The owner signed Google's CLA as an individual, for the A2UI listing; the GitHub release carries no assets; no ADK example in this repository, and a separate example repository, the owner's, may follow after `0.1.0` (not M4).
+
+M4 publishes `0.1.0`, gets the package listed and announced, and adds no features. It passes when all eleven hold:
+
+1. The first-load delay was tried at least twice in brand-new venvs from PyPI, with a Streamlit-only control. The report records the steps, versions and timings, and the cause or "not reproduced". If it is Streamlit's or the machine's first-run cost, the README says so in one sentence; if it is the package's, it is fixed with a test before `0.1.0`.
+2. Milestone handoffs, reports, `findings.md` and `notes-m1.md` are in `docs/history/` with a short index. `git grep` finds no link or path to their old locations, and no file linked from the `0.1.0rc1` README moved. The command list is in `CONTRIBUTING.md`; `CLAUDE.md` and `README.md` point to it, and CI still runs the same commands.
+3. `streamlit-a2ui 0.1.0` is on PyPI, published by `release.yml` from tag `v0.1.0` after a `workflow_dispatch` dry run on the same commit. The owner pushed the tag and approved the `pypi` environment. The files on PyPI match the run's artifact by SHA-256. Its README installs with `pip install streamlit-a2ui`, states the pre-1.0 status without calling it a release candidate, and renders on PyPI with working absolute links. `CHANGELOG.md` has a dated `[0.1.0]` section.
+4. In a fresh environment outside the checkout, `0.1.0` installed from PyPI imports from `site-packages`, a plain install picks `0.1.0`, and both examples pass playbook parts 3 and 4 in a browser, or are marked "needs owner verification".
+5. A GitHub release `v0.1.0` exists, with notes drafted from the CHANGELOG that state A2UI 1.0 only, the Streamlit floor, the pinned 0.x renderer packages and overrides, the known limitations and the accepted risk. The owner created it, or Claude Code did at the owner's explicit request in that session.
+6. Listing pull requests to `a2ui-project/a2ui` (community renderers table) and `streamlit/gallery` (component registry) are drafted against each repository's instructions as rechecked on the day, the gallery JSON validates against its schema, and each was opened by the owner or at the owner's request. The report records the URLs and their state, or "not opened" with the reason.
+7. The Streamlit forum post and the A2UI GitHub Discussions post are drafted, published by the owner, and their URLs recorded.
+8. The watch week ran for seven days after the posts; every package bug reported in it was fixed with a test and released as `0.1.x` through `release.yml`, and everything else went to the backlog. The report lists them, or says there were none.
+9. Claude Code created no tag, uploaded nothing, created no GitHub release, opened no pull request outside this repository and published no post, except where the owner explicitly asked in that session; the report names each such request.
+10. All tests and linters pass locally and in CI. Nothing in the Architecture or Security sections changed without an ADR and the owner's approval. The owner's decisions on the ADK example, the CLA and release assets are recorded.
+11. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md`, `docs/upstream-issues.md`, `docs/history/README.md`, `docs/history/m4-drafts.md` and `docs/history/m4-report.md` exist and agree with each other.
+
+Work in other repositories (listing drafts, schema checks) happens in scratch clones outside this repository. The result goes in `docs/history/m4-report.md`; stop for the owner's review once `0.1.0` is out and the drafts are done, and append the watch-week result at its end.
+
+### M3 — release candidate and real-agent check (done)
+
+M3 published `0.1.0rc1` to PyPI through `release.yml` from tag `v0.1.0rc1` on `388f2a7` (owner-pushed and owner-approved; files byte-identical to the run's artifact, PEP 740 attestations), and checked the package against a real Google ADK agent on `a2ui-agent-sdk` 0.12.0 outside the repository: an action round trip and a streamed response worked, with no package bugs. It filed the upstream issues (a2ui-project/a2ui#4278, #4279, a comment on #4059), made the renderer reject unknown component types and functions, measured the second-message limitation (a double click returns one action), and added the README GIF and PyPI install. All eight criteria passed. The result is in `docs/m3-report.md`, the handoff in `docs/handoff-m3.md`.
 
 ### M2 — release engineering (done)
 
@@ -120,13 +136,14 @@ Claude Code never changes these settings; they are the owner's.
 |---|---|
 | Repository | `josechudev/streamlit-a2ui`, **public** (since M3, not M4: GitHub Free has no environment reviewers on private repositories; a full-history secret and employer-data scan was clean first) |
 | `master` ruleset | no deletion or force-push; pull request required (0 approvals); required checks `Test (py3.10 / streamlit floor)`, `Test (py3.13 / streamlit latest)`, `Build wheel and sdist`, `Installed wheel smoke test`; no bypass |
+| `develop` branch | created 2026-11-18 from `master` (`9cc0a23`) for gitflow. Not protected until the owner adds a `develop` ruleset matching `master`'s; until then, never push to it directly either |
 | `release tag` ruleset | `refs/tags/v*`: no deletion, update or force-push; no bypass. To re-tag after a failed run that uploaded nothing, the owner disables it temporarily. Never re-tag a version already on PyPI |
 | GitHub environment `pypi` | owner is the required reviewer; admins cannot bypass; deployments only from tags `v*` |
 | PyPI | project `streamlit-a2ui`, created by the first Trusted Publishing upload (`0.1.0rc1`); publisher: repository `josechudev/streamlit-a2ui`, workflow `release.yml`, environment `pypi` |
 | Security settings | private vulnerability reporting, secret scanning with push protection, Dependabot alerts and security updates, SHA pinning of actions required, read-only default workflow token, merged branches auto-deleted |
 | Topics | `a2ui`, `python`, `streamlit`, `streamlit-component` |
 | Dependabot | React, `react-dom` and their types grouped; React and `@types/node` majors held (React stays 18 until after 0.1.0); `@types/node` `^24`. The red "Dependabot Updates" runs for `zod` end in `security_update_not_possible`: expected, the accepted advisory in `docs/security.md` |
-| Tags, releases | `v0.1.0rc1` (annotated, on `388f2a7`), published to PyPI on 2026-11-18 by release run 44248941528. No GitHub release (that is M4, for `0.1.0`) |
+| Tags, releases | `v0.1.0rc1` (annotated, on `388f2a7`), published to PyPI on 2026-11-18 by release run 44248941528. No GitHub release yet: the first is `v0.1.0`, in M4, created by the owner |
 
 ## Security rules (non-negotiable)
 
@@ -176,8 +193,9 @@ docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
 docs/spike-report.md       written at the end of M0
 docs/m1-report.md          written at the end of M1
 docs/m2-report.md          written at the end of M2
-docs/handoff-m1.md … -m3.md  one handoff per milestone: decisions, steps, acceptance criteria
+docs/handoff-m1.md … -m4.md  one handoff per milestone: decisions, steps, acceptance criteria
 docs/m3-report.md          written at the end of M3
+docs/history/              M4 moves the handoffs, reports, findings.md and notes-m1.md here (handoff-m4, step b)
 docs/release-plan.md       milestones to 0.1.0
 docs/testing-playbook.md   manual and automated test steps
 docs/upstream-issues.md    drafts of issues to file upstream
@@ -275,6 +293,6 @@ Give a subagent the exact files, the change and the acceptance check. Review its
 
 ## Out of scope — refuse or ask first
 
-Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing by any route other than `release.yml` on a `v*` tag the owner pushes and approves: Claude Code never creates or pushes tags, never uploads to PyPI, TestPyPI or npm, never runs `twine upload` or `uv publish`, never creates GitHub releases · running `release.yml` other than as a `workflow_dispatch` dry run the owner starts or asks for · `0.1.0`, the GitHub release, gallery listings and posts (M4) · changing the repository's visibility, settings, rulesets or environments (the owner's) · an agent or ADK example in this repository without the owner's approval after M3's real-agent check (the check itself runs in a scratch folder outside the repository) · upgrading `@a2ui/*`, `dompurify` or React · filing upstream issues (the owner does) · coverage badges, a multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish · pushing or opening a pull request unless the owner asks.
+Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing by any route other than `release.yml` on a `v*` tag the owner pushes and approves: Claude Code never creates or pushes tags, never uploads to PyPI, TestPyPI or npm, never runs `twine upload` or `uv publish` · running `release.yml` other than as a `workflow_dispatch` dry run the owner starts or asks for · creating a GitHub release, opening a pull request in another repository (listings), or posting on the Streamlit forum or GitHub Discussions, unless the owner explicitly asks for that action in the same session (Claude Code drafts them) · signing Google's CLA or any agreement for the owner · changing the repository's visibility, settings, rulesets or environments (the owner's) · an agent or ADK example in this repository (owner decided against it, 2026-11-18), or the separate example repository before `0.1.0` is out · upgrading `@a2ui/*`, `dompurify` or React, or dropping an override, even if upstream ships a fix during M4 · backlog items after 0.1.0 (`docs/release-plan.md`): returning a list of messages, React 19, custom catalogs · filing upstream issues (the owner does) · coverage badges, a multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish · pushing or opening a pull request unless the owner asks.
 
 If a task seems to need one of these, stop and say so instead of building it.
