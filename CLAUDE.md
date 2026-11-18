@@ -8,7 +8,7 @@ Personal open-source project. Never add employer code, names, hostnames or data.
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/history/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/history/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/history/m2-report.md`). M3 merged on 2026-11-18 as PRs #10–#15 (`docs/history/m3-report.md`). M4 is defined in `docs/history/handoff-m4.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/history/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/history/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/history/m2-report.md`). M3 merged on 2026-11-18 as PRs #10–#15 (`docs/history/m3-report.md`). M4 is defined in `docs/history/handoff-m4.md`: `0.1.0` is on PyPI, the GitHub release, listings and posts are drafted in `docs/history/m4-drafts.md` for the owner, and `docs/history/m4-report.md` waits for the owner's review (watch week appended later). M5, the examples repository `josechudev/streamlit-a2ui-examples`, is in `docs/release-plan.md` and runs in its own session and repository. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
 Push or open a pull request only when the owner asks. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from a remote branch tracks it.
 

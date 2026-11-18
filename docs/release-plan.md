@@ -1,6 +1,6 @@
 # streamlit-a2ui — Release plan to 0.1.0
 
-Status: 2026-11-18. M1 and M2 merged to `master` (`docs/history/m1-report.md`, `docs/history/m2-report.md`). M3 merged on 2026-11-18 (`docs/history/m3-report.md`): `0.1.0rc1` is on PyPI. M4 is in progress, defined in `docs/history/handoff-m4.md`; milestone handoffs and reports are in `docs/history/`. The repository went public at the start of M3 (see M4).
+Status: 2026-11-18. M1 and M2 merged to `master` (`docs/history/m1-report.md`, `docs/history/m2-report.md`). M3 merged on 2026-11-18 (`docs/history/m3-report.md`): `0.1.0rc1` is on PyPI. M4: `0.1.0` on PyPI since 2026-11-18; the GitHub release, listings and posts are drafted for the owner, and the result waits for review (`docs/history/m4-report.md`). M5 (examples repository) has started. Milestone handoffs and reports are in `docs/history/`. The repository went public at the start of M3 (see M4).
 Goal: `pip install streamlit-a2ui` works for a stranger, and the right people know it exists. Nothing else.
 
 Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0.15.0 and `@a2ui/markdown-it` still 0.2.2 (no 1.0-aligned release yet).
@@ -13,6 +13,7 @@ Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0
 | M2 | Release engineering | CI green on a PR; a wheel built by CI installs and runs in a clean venv on the Streamlit floor and on latest | Claude Code |
 | M3 | Release candidate + real-agent check | `0.1.0rc1` on PyPI; installed from PyPI in a fresh venv; one real ADK agent drove a surface end to end | Owner + Claude Code |
 | M4 | 0.1.0 public | `0.1.0` on PyPI, GitHub release, listed on A2UI and Streamlit galleries | Owner |
+| M5 | Examples with a real model | `josechudev/streamlit-a2ui-examples` has a chat where a real model writes the UI; the README GIF shows it | Claude Code + owner |
 
 Estimated effort with the owner's evenings: M2 one or two sessions; M3 one session plus fixes; M4 an hour plus waiting for listing PRs.
 
@@ -48,11 +49,19 @@ Handoff: `docs/history/handoff-m4.md`. It adds, before the tag, a check of M3's 
 
 - ~~Flip the repo to public.~~ *Done early, at the start of M3: GitHub Free has no environment reviewers on private repositories, and the `pypi` environment needs one. A full-history scan for secrets and employer data was clean first.*
 - *Done 2026-11-18: `0.1.0` on PyPI from tag `v0.1.0` (release run 44356056432), with a fix for a 20-second first page load found while checking `0.1.0rc1`.* Tag `v0.1.0`; GitHub release notes from `CHANGELOG.md`, stating A2UI 1.0 only, the Streamlit floor, the known risks, and the pinned 0.x renderer packages.
+- *Drafted 2026-11-18 in `docs/history/m4-drafts.md`: the release notes, both listing PRs (A2UI row Prettier-checked, gallery JSON schema-validated) and both posts. The owner creates, opens and publishes them.*
 - **Listings:**
   - A2UI ecosystem renderers page: PR adding a row (platform: Streamlit / Python; v1.0 only). Check the current repo's contribution instructions; the listing has moved between repos before.
   - Streamlit component gallery: PR to `streamlit/gallery` component registry; add the `streamlit-component` topic to the repo.
   - Posts: Streamlit forum (Custom Components), A2UI GitHub Discussions with a short demo.
 - After the posts: watch issues for a week; fix only bugs as `0.1.x`.
+
+### M5 — Examples with a real model
+Decided 2026-11-18, after the owner asked whether the README GIF showed real components (it does; the scripted demo hid it). Agent examples live in `josechudev/streamlit-a2ui-examples` (created by the owner; Apache-2.0), not in this repository: they need an API key and agent libraries that move fast.
+
+- A Streamlit chat in which a Gemini model (Google ADK with `a2ui-agent-sdk`) writes A2UI for requests such as "a card saying …"; each reply renders its own surface, shows the JSON it came from, and sends clicks back to the agent. Pinned versions, `.env` for the key, never committed.
+- A GIF of it replaces the README GIF here, through a docs-only `hotfix/<topic>` PR; the README links the examples repository from "Using it with a real agent".
+- No change to the package. A bug found there is fixed here, with a test, as `0.1.x`.
 
 ## Decisions to make along the way
 1. **Release on the 0.x renderer packages or wait for a 1.0-aligned `@a2ui/react`?** Recommendation: release; pins and overrides are documented, and waiting has no end date. When upstream ships, that is `0.1.x` or `0.2.0` depending on breakage.
