@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-This project is pre-release. Only the latest release gets security fixes. Before the first release, only `master` does.
+This project is pre-release. Only the latest release gets security fixes.
 
 ## Reporting a vulnerability
 

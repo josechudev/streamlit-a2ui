@@ -57,14 +57,14 @@ CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request on two legs (
 .venv/bin/streamlit run examples/basic_app.py
 ```
 
-Open the URL it prints. Keep the browser's developer console open on the Console tab.
+Open the URL it prints. Keep the browser's developer console open on the Console tab. In M3's check of the PyPI install, the very first page load in a brand-new venv stayed on the title for over 45 seconds with no error in the server log or the console, and a reload rendered it at once (cause not investigated). If that happens, reload once and note it.
 
 | # | Do | Expected |
 |---|---|---|
 | B1 | Load the page | A "Contact us" form: Name, Message, a **Send** button, the caption "The agent's reply will appear here." Under "Last message returned by `a2ui_surface`": "None yet. Fill in the form and press Send." |
 | B2 | Type a name and a message, press **Send** | The JSON panel shows one message: `"version": "1.0"`, `action.name` `send_message`, `context` with your name and message. The reply reads "Thanks, *name*! The agent got *N* characters." |
 | B3 | Press **Send** again without changing anything | A new action with a new `timestamp`. Exactly one per click |
-| B4 | Type new text into Message, don't send. Open **Try more**, press **Agent: append an update** | Title becomes "Contact us (1)". The unsent text is still in the field. Log length goes up by 1 |
+| B4 | Type new text into Message, don't send. Open **Try more**, press **Agent: append an update** | Title becomes "Contact us (*N*)", where *N* counts every `updateComponents` in the log (the replies from B2–B3 included, so 3 after B2–B3). The unsent text is still in the field. Log length goes up by 1 |
 | B5 | Press **Agent: append an invalid message** | A red plain-text notice inside the component, starting `VALIDATION_FAILED [contact]`. The form stays visible with your text. The JSON panel does not change. The console shows one `[streamlit-a2ui] A2UI error` warning |
 | B6 | Press **Send** after B5 | Still works: a new action arrives and the reply updates |
 | B7 | Press **Replace the log** | The surface rebuilds from scratch: fields empty, notice gone, title back to "Contact us" |

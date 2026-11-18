@@ -25,7 +25,7 @@ Pre-1.0. `0.1.0rc1` is the first release candidate: try it and report problems, 
 pip install --pre streamlit-a2ui
 ```
 
-`0.1.0rc1` is a pre-release, so pip installs it only with `--pre` or an exact version (`pip install streamlit-a2ui==0.1.0rc1`); with uv, use `uv pip install --prerelease=allow streamlit-a2ui` or the exact version. Until `0.1.0` is out, a plain `pip install streamlit-a2ui` finds nothing to install. The wheel contains the built frontend, so no Node is needed.
+`0.1.0rc1` is a pre-release. While no final release exists, pip and uv install it even without `--pre`; once `0.1.0` is out, a plain install picks the latest final release and you need `--pre` (pip), `--prerelease=allow` (uv) or an exact version (`streamlit-a2ui==0.1.0rc1`) to get a release candidate. The wheel contains the built frontend, so no Node is needed.
 
 Then run the example: download [`examples/basic_app.py`](https://github.com/josechudev/streamlit-a2ui/blob/master/examples/basic_app.py) and run `streamlit run basic_app.py`.
 

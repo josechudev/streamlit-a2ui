@@ -85,7 +85,7 @@ Done for this repository after M2; kept here as a record and for forks.
 2. Merge to `master` and wait for CI to pass.
 3. Optional dry run: Actions → Release → Run workflow. It builds and checks the wheel and sdist and stops before publishing.
 4. Tag and push: `git tag -a v<version> -m v<version>` on the commit the dry run built, then `git push origin v<version>`. The tag must equal the version, for example `v0.1.0rc1` for `0.1.0rc1`; the workflow refuses a mismatch. A pending publisher does not reserve the name on PyPI, so check it is still free before the first release.
-5. Approve the `pypi` environment when the workflow asks. Then install the published version in a fresh venv, outside the checkout and with no package cache, and run both examples. A pre-release needs `pip install --pre` or an exact pin.
+5. Approve the `pypi` environment when the workflow asks. Then install the published version in a fresh venv, outside the checkout and with no package cache, and run both examples. Install a pre-release with an exact pin (`==<version>`): a plain install picks it only while no final release exists.
 
 ### When a release fails
 
