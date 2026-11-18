@@ -1,6 +1,6 @@
 # streamlit-a2ui — Release plan to 0.1.0
 
-Status: 2026-11-18. M1 and M2 merged to `master` (`docs/m1-report.md`, `docs/m2-report.md`). M3 done and waiting for the owner's review (`docs/m3-report.md`): `0.1.0rc1` is on PyPI. The repository went public at the start of M3 (see M4).
+Status: 2026-11-18. M1 and M2 merged to `master` (`docs/m1-report.md`, `docs/m2-report.md`). M3 merged on 2026-11-18 (`docs/m3-report.md`): `0.1.0rc1` is on PyPI. M4 is defined in `docs/handoff-m4.md`. The repository went public at the start of M3 (see M4).
 Goal: `pip install streamlit-a2ui` works for a stranger, and the right people know it exists. Nothing else.
 
 Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0.15.0 and `@a2ui/markdown-it` still 0.2.2 (no 1.0-aligned release yet).
@@ -44,6 +44,8 @@ Handoff: `docs/handoff-m3.md`. Result: `docs/m3-report.md`. The handoff moves th
 - **README pass:** a GIF of the basic example, install from PyPI, status badge text that says pre-1.0. *Done, before the tag.*
 
 ### M4 — 0.1.0 public
+Handoff: `docs/handoff-m4.md`. It adds, before the tag, a check of M3's first-load delay and a repository tidy-up (history to `docs/history/`, the command list to `CONTRIBUTING.md`), and asks the owner to decide on the ADK example (decision 3 below).
+
 - ~~Flip the repo to public.~~ *Done early, at the start of M3: GitHub Free has no environment reviewers on private repositories, and the `pypi` environment needs one. A full-history scan for secrets and employer data was clean first.*
 - Tag `v0.1.0`; GitHub release notes from `CHANGELOG.md`, stating A2UI 1.0 only, the Streamlit floor, the known risks, and the pinned 0.x renderer packages.
 - **Listings:**
