@@ -1,6 +1,6 @@
 # streamlit-a2ui — Release plan to 0.1.0
 
-Status: 2026-11-17. M1 and M2 merged to `master` (`docs/m1-report.md`, `docs/m2-report.md`; M2 as PR #4, CI green). M3 started: `docs/handoff-m3.md`. The repository went public at the start of M3 (see M4).
+Status: 2026-11-18. M1 and M2 merged to `master` (`docs/m1-report.md`, `docs/m2-report.md`). M3 done and waiting for the owner's review (`docs/m3-report.md`): `0.1.0rc1` is on PyPI. The repository went public at the start of M3 (see M4).
 Goal: `pip install streamlit-a2ui` works for a stranger, and the right people know it exists. Nothing else.
 
 Rechecked 2026-11-17: `streamlit-a2ui` still free on PyPI; `@a2ui/react` still 0.15.0 and `@a2ui/markdown-it` still 0.2.2 (no 1.0-aligned release yet).
@@ -37,11 +37,11 @@ Not in M2: docs site, coverage badges, multi-OS matrix, pre-commit frameworks, r
 ### M3 — Release candidate and real-agent check
 Handoff: `docs/handoff-m3.md`. Result: `docs/m3-report.md`. The handoff moves the README pass before the tag, because PyPI keeps the README uploaded with each version.
 
-- **Upstream reports first** (so the README can link them): the `@a2ui/markdown-it` peer range and DOMPurify pin; `injectBasicCatalogStyles()` writing page-wide styles; `web_core` accepting unknown component types. Drafts in `docs/upstream-issues.md`. Link the issues from `docs/security.md` and ADR-008.
-- **Real-agent check, outside the package.** Every payload so far was hand-written. In a scratch repo (personal machine, no employer code), build a minimal Google ADK agent with `a2ui-agent-sdk`, feed it `renderer_capabilities()`, and drive a surface through one action round trip and one streamed response. Record what broke. Fix bugs in the package; do not add an adapter. Whether a cleaned version ships as `examples/adk_agent_app.py` (needs an API key) is a decision for then.
-  - Also watch for a second renderer-to-agent message replacing the first before a rerun (two quick clicks, or an action during a `callAgentFunction`). Record whether it happens; fixing it changes the return type and needs an ADR, so do not fix it in M3.
-- **Publish `0.1.0rc1`** through the release workflow. Install it from PyPI in a fresh venv on another machine or container and run both examples. This is the first time the wheel leaves the build machine.
-- **README pass:** a GIF of the basic example, install from PyPI, status badge text that says pre-1.0.
+- **Upstream reports first** (so the README can link them): *done: a2ui-project/a2ui#4278, #4279, and a comment on the existing #4059; the unknown-type gap was ours and is fixed.* the `@a2ui/markdown-it` peer range and DOMPurify pin; `injectBasicCatalogStyles()` writing page-wide styles; `web_core` accepting unknown component types. Drafts in `docs/upstream-issues.md`. Link the issues from `docs/security.md` and ADR-008.
+- **Real-agent check, outside the package.** *Done: action round trip and streamed response work with an ADK agent on `a2ui-agent-sdk` 0.12.0; no package bugs.* Every payload so far was hand-written. In a scratch repo (personal machine, no employer code), build a minimal Google ADK agent with `a2ui-agent-sdk`, feed it `renderer_capabilities()`, and drive a surface through one action round trip and one streamed response. Record what broke. Fix bugs in the package; do not add an adapter. Whether a cleaned version ships as `examples/adk_agent_app.py` (needs an API key) is a decision for then.
+  - Also watch for a second renderer-to-agent message replacing the first before a rerun (two quick clicks, or an action during a `callAgentFunction`). Record whether it happens; fixing it changes the return type and needs an ADR, so do not fix it in M3. *It happens: a double or triple click returns one action.*
+- **Publish `0.1.0rc1`** through the release workflow. *Done 2026-11-18, installed from PyPI in a fresh venv (no container available), both examples pass.* Install it from PyPI in a fresh venv on another machine or container and run both examples. This is the first time the wheel leaves the build machine.
+- **README pass:** a GIF of the basic example, install from PyPI, status badge text that says pre-1.0. *Done, before the tag.*
 
 ### M4 — 0.1.0 public
 - ~~Flip the repo to public.~~ *Done early, at the start of M3: GitHub Free has no environment reviewers on private repositories, and the `pypi` environment needs one. A full-history scan for secrets and employer data was clean first.*

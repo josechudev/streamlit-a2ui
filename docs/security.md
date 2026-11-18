@@ -2,7 +2,7 @@
 
 `streamlit-a2ui` renders user interfaces that an agent describes. Treat every agent message as untrusted input: a model can be prompt-injected, and an agent can be compromised or simply wrong. This page describes what the package does to contain that, and what it cannot do.
 
-Status: pre-release (M3, release candidate `0.1.0rc1` in preparation; the repository is public), A2UI 1.0 only, `@a2ui/react` and `@a2ui/web_core` 0.15.0. Last checked 2026-11-17.
+Status: pre-release (`0.1.0rc1` on PyPI since 2026-11-18; the repository is public), A2UI 1.0 only, `@a2ui/react` and `@a2ui/web_core` 0.15.0. Last checked 2026-11-17.
 
 ## The model
 
