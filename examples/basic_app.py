@@ -106,7 +106,15 @@ def scripted_agent(event: Message) -> list[Message]:
     length = len(str(context.get("message") or ""))
     return [
         update_components(
-            [text("reply", f"Thanks, {name}! The agent got {length} characters.")]
+            # "body" explicitly: the placeholder was a caption, and the reply should
+            # stand out as the agent's answer.
+            [
+                text(
+                    "reply",
+                    f"Thanks, {name}! The agent got {length} characters.",
+                    "body",
+                )
+            ]
         )
     ]
 
