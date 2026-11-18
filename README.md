@@ -1,6 +1,6 @@
 # streamlit-a2ui
 
-![Status: pre-1.0 release candidate](https://img.shields.io/badge/status-pre--1.0%20release%20candidate-orange)
+![Status: pre-1.0](https://img.shields.io/badge/status-pre--1.0-orange)
 
 Render [A2UI](https://a2ui.org) surfaces inside Streamlit apps.
 
@@ -12,7 +12,7 @@ It is for Python developers who already have an agent that speaks A2UI, or want 
 
 ## Status
 
-Pre-1.0. `0.1.0rc1` is the first release candidate: try it and report problems, but expect the API and the supported versions to change before 1.0.
+Pre-1.0. `0.1.0` is the first release: try it and report problems, but expect the API and the supported versions to change before 1.0.
 
 - A2UI **1.0** only, with the official basic catalog. 0.9.x and 0.8 are not supported.
 - Streamlit >= 1.59 (Components v2). CI runs the floor (1.59) and the latest release; developed on 1.67.
@@ -22,10 +22,10 @@ Pre-1.0. `0.1.0rc1` is the first release candidate: try it and report problems, 
 ## Install
 
 ```bash
-pip install --pre streamlit-a2ui
+pip install streamlit-a2ui
 ```
 
-`0.1.0rc1` is a pre-release. While no final release exists, pip and uv install it even without `--pre`; once `0.1.0` is out, a plain install picks the latest final release and you need `--pre` (pip), `--prerelease=allow` (uv) or an exact version (`streamlit-a2ui==0.1.0rc1`) to get a release candidate. The wheel contains the built frontend, so no Node is needed.
+This installs the latest final release. To try a release candidate, use `--pre` (pip), `--prerelease=allow` (uv) or an exact version. The wheel contains the built frontend, so no Node is needed.
 
 Then run the example: download [`examples/basic_app.py`](https://github.com/josechudev/streamlit-a2ui/blob/master/examples/basic_app.py) and run `streamlit run basic_app.py`.
 
@@ -209,7 +209,7 @@ The component runs in your app's page with no iframe. Read [docs/security.md](ht
 
 ## Development
 
-See [CONTRIBUTING.md](https://github.com/josechudev/streamlit-a2ui/blob/master/CONTRIBUTING.md) for how to build, test and release; the full command list is in [CLAUDE.md](https://github.com/josechudev/streamlit-a2ui/blob/master/CLAUDE.md), and [docs/testing-playbook.md](https://github.com/josechudev/streamlit-a2ui/blob/master/docs/testing-playbook.md) has the manual checks. On every pull request CI runs the build, the unit tests, pytest, ruff and one Playwright browser test on Python 3.10 with Streamlit 1.59 and on Python 3.13 with the latest Streamlit, then builds the wheel and sdist once and runs the browser test against the installed wheel. The architecture is summarised in [docs/architecture.md](https://github.com/josechudev/streamlit-a2ui/blob/master/docs/architecture.md), design decisions are in [docs/adr/](https://github.com/josechudev/streamlit-a2ui/tree/master/docs/adr), and changes are in [CHANGELOG.md](https://github.com/josechudev/streamlit-a2ui/blob/master/CHANGELOG.md).
+See [CONTRIBUTING.md](https://github.com/josechudev/streamlit-a2ui/blob/master/CONTRIBUTING.md) for how to build, test and release, with the full command list, and [docs/testing-playbook.md](https://github.com/josechudev/streamlit-a2ui/blob/master/docs/testing-playbook.md) has the manual checks. On every pull request CI runs the build, the unit tests, pytest, ruff and one Playwright browser test on Python 3.10 with Streamlit 1.59 and on Python 3.13 with the latest Streamlit, then builds the wheel and sdist once and runs the browser test against the installed wheel. The architecture is summarised in [docs/architecture.md](https://github.com/josechudev/streamlit-a2ui/blob/master/docs/architecture.md), design decisions are in [docs/adr/](https://github.com/josechudev/streamlit-a2ui/tree/master/docs/adr), and changes are in [CHANGELOG.md](https://github.com/josechudev/streamlit-a2ui/blob/master/CHANGELOG.md).
 
 ## License
 

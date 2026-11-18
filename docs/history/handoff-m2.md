@@ -1,12 +1,12 @@
 # Handoff: M2 — release engineering
 
-Written 2026-11-17 at the owner's request. The decisions below are the owner's, taken during the M1 review (`docs/m1-report.md`, "Owner decisions after the report").
+Written 2026-11-17 at the owner's request. The decisions below are the owner's, taken during the M1 review (`docs/history/m1-report.md`, "Owner decisions after the report").
 
 ## Context
 
 `streamlit-a2ui` renders Google's A2UI 1.0 protocol in Streamlit by wrapping the official web renderer (`@a2ui/react` + `@a2ui/web_core`) in a Streamlit Components v2 component.
 
-- **M1 is merged** to `master`. It hardened the spike into v0.1 (`docs/m1-report.md`).
+- **M1 is merged** to `master`. It hardened the spike into v0.1 (`docs/history/m1-report.md`).
 - **Part of M2 is merged too**, started early at the owner's request:
   - `.github/workflows/ci.yml`: one job on Python 3.13 and Streamlit 1.67, covering the build, Vitest, pytest with the wheel checks, ruff and Prettier.
   - One Playwright smoke test, `e2e/test_basic_app.py`.
@@ -15,7 +15,7 @@ Written 2026-11-17 at the owner's request. The decisions below are the owner's, 
 
 M2 makes the package releasable, but does not release it. When M2 ends, a tag *could* publish `0.1.0rc1` to PyPI through a reviewed workflow, but nobody has created a tag and nothing has been uploaded. Publishing the release candidate is M3 (`docs/release-plan.md`).
 
-Read these first: `CLAUDE.md`, `docs/release-plan.md` (M2 section), `docs/m1-report.md` and `docs/testing-playbook.md`. Where this file and `CLAUDE.md` disagree, this file wins, and step 1 brings `CLAUDE.md` in line.
+Read these first: `CLAUDE.md`, `docs/release-plan.md` (M2 section), `docs/history/m1-report.md` and `docs/testing-playbook.md`. Where this file and `CLAUDE.md` disagree, this file wins, and step 1 brings `CLAUDE.md` in line.
 
 ## Decisions (treat as settled)
 
@@ -85,7 +85,7 @@ Work on branch `m2-release`, which already exists and was cut from `master` afte
    - Keep it only if every test, including e2e, still passes.
    - The license-comment and `dropConsole` behaviour must not change.
 10. **Refresh `docs/architecture.md`.** It still describes the end of M0. Bring it to the current state: Components v2, the log and cursor, `LogSession`, the bundle claim, error notices and the boundary, lazy registration, CI and release. Use the ADRs and M1's findings, and keep it short. Any change to the Architecture or Security sections of `CLAUDE.md` still needs an ADR and the owner's approval. M2 should need none; if it does, stop and ask.
-11. **Report.** Write `docs/m2-report.md`, then stop and wait for review.
+11. **Report.** Write `docs/history/m2-report.md`, then stop and wait for review.
 
 ## Acceptance criteria
 
@@ -98,7 +98,7 @@ Work on branch `m2-release`, which already exists and was cut from `master` afte
 7. A throwing surface shows a plain-text notice and leaves the other surfaces and the notices list rendered, as shown by a test.
 8. Bundle sizes are recorded before and after the whitespace change, with a keep or revert decision.
 9. All tests and linters pass locally and in CI. The click-through in `docs/testing-playbook.md` (parts 3 and 4) still passes in a browser, or is marked "needs owner verification".
-10. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md` and `docs/m2-report.md` exist and agree with each other.
+10. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md` and `docs/history/m2-report.md` exist and agree with each other.
 
 ## Constraints
 
@@ -142,7 +142,7 @@ Work on branch `m2-release`, which already exists and was cut from `master` afte
 - **`renderer_capabilities.json` and `THIRD_PARTY_LICENSES.txt` are generated and git-ignored.** Never hand-edit them; CI must run `npm run build` before packaging.
 - **`.claude/` is local and untracked.** Do not commit it.
 
-## Deliverable: `docs/m2-report.md`
+## Deliverable: `docs/history/m2-report.md`
 
 - Each acceptance criterion: pass, fail or needs owner verification, with how it was checked, including links to the CI runs if you were asked to push.
 - The Streamlit floor that CI proved, and what failed below it, if anything.

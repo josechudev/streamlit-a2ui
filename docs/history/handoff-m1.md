@@ -2,11 +2,11 @@
 
 ## Context
 
-`streamlit-a2ui` renders Google's A2UI 1.0 protocol in Streamlit by wrapping the official web renderer (`@a2ui/react` + `@a2ui/web_core`) in a Streamlit Components v2 component. M0 (branch `m0-spike`, report in `docs/spike-report.md`) proved the architecture. The owner has reviewed it and made the decisions listed below.
+`streamlit-a2ui` renders Google's A2UI 1.0 protocol in Streamlit by wrapping the official web renderer (`@a2ui/react` + `@a2ui/web_core`) in a Streamlit Components v2 component. M0 (branch `m0-spike`, report in `docs/history/spike-report.md`) proved the architecture. The owner has reviewed it and made the decisions listed below.
 
 M1 turns the spike into something a stranger could install from source and use. It is not a feature milestone. Everything in "Out of scope" stays out.
 
-Read `CLAUDE.md` and `docs/spike-report.md` first. Where this file and `CLAUDE.md` disagree, this file wins, and step 1 is to bring `CLAUDE.md` in line.
+Read `CLAUDE.md` and `docs/history/spike-report.md` first. Where this file and `CLAUDE.md` disagree, this file wins, and step 1 is to bring `CLAUDE.md` in line.
 
 ## Decisions made since M0 (treat as settled)
 
@@ -29,7 +29,7 @@ Work on a new branch `m1-v0.1` created from `m0-spike`. Small commits, one conce
 7. Examples. Replace `examples/spike_app.py` with:
    - `examples/basic_app.py`: a form surface, the returned `action` displayed, and a scripted "agent" that answers by appending messages. No LLM, no network, no API keys.
    - `examples/streaming_app.py`: a scripted generator feeds the log over several seconds while the component, inside `@st.fragment(run_every=...)`, repaints. It must show an action fired from inside the fragment being received and handled. All sample payloads are A2UI 1.0, taken from the installed package's schemas.
-8. Answer two open questions and write the answers into `docs/notes-m1.md`:
+8. Answer two open questions and write the answers into `docs/history/notes-m1.md`:
    - When a trigger fires from a component inside a fragment, does Streamlit rerun the fragment only or the whole script, and where is the returned message visible? State what the streaming example therefore has to do.
    - Does `web_core`'s page-wide `:root{color-scheme: light dark}` visibly change Streamlit's own widgets (inputs, selects, scrollbars) in light or dark theme? Compare a page with and without the component mounted.
 9. Docs.
@@ -41,7 +41,7 @@ Work on a new branch `m1-v0.1` created from `m0-spike`. Small commits, one conce
     - Frontend unit tests (the template's runner, or Vitest): the cursor processes only the unprocessed tail; a shorter log triggers dispose and replay; an `ActionPayload` is wrapped into the 1.0 wire shape; an outbound-listener message passes through unchanged.
     - A build check that fails if `asset_dir` contains source maps.
     - `ruff` clean; TypeScript strict with no errors and no `any` in our code.
-11. Report. Write `docs/m1-report.md`, then stop and wait for review.
+11. Report. Write `docs/history/m1-report.md`, then stop and wait for review.
 
 ## Acceptance criteria
 
@@ -53,7 +53,7 @@ Work on a new branch `m1-v0.1` created from `m0-spike`. Small commits, one conce
 6. One `dompurify` at 3.4.18 in the lockfile and in the bundle.
 7. The wheel has no source maps and no CDN references; the production bundle has no construction log.
 8. All tests and linters pass. Criteria 2, 3 and 4 were exercised in a browser by you, not inferred from code. If you cannot drive a browser, write a click-through checklist for the owner instead and mark those criteria "needs owner verification".
-9. `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/001`–`009`, `docs/notes-m1.md` and `docs/m1-report.md` exist and agree with each other.
+9. `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/001`–`009`, `docs/history/notes-m1.md` and `docs/history/m1-report.md` exist and agree with each other.
 
 ## Constraints
 
@@ -70,7 +70,7 @@ Work on a new branch `m1-v0.1` created from `m0-spike`. Small commits, one conce
 
 Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · sending errors to Python or changing the return type · a streaming helper function · typed Python message models · persisting form state across remounts · CI workflows · a docs site · publishing to PyPI or npm · pushing to a remote.
 
-## Deliverable: `docs/m1-report.md`
+## Deliverable: `docs/history/m1-report.md`
 
 - Each acceptance criterion: pass, fail, or needs owner verification, with how it was checked.
 - What the code review in step 4 changed and why.

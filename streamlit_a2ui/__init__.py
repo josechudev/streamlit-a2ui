@@ -88,7 +88,11 @@ def a2ui_surface(
     """
     result = _component()(
         key=key,
-        data={"messages": list(messages)},
+        # A tuple, not a list: Streamlit checks each top-level value of `data`
+        # for dataframes, and for a list that check imports pandas and pyarrow.
+        # In a new environment that first import took over 20 s, before the
+        # surface could appear. A tuple is skipped and still sent as a JSON array.
+        data={"messages": tuple(messages)},
         on_renderer_message_change=_ignore,
     )
     value = result.get("renderer_message")

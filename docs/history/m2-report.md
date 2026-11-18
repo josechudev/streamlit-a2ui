@@ -1,6 +1,6 @@
 # M2 report: release engineering
 
-Date: 2026-11-17. Branch `m2-release`, cut from `master` after PR #3. It holds the handoff commit plus the M2 commits listed at the end. Nothing has been pushed, and no tag, GitHub release or upload was made. The handoff is in `docs/handoff-m2.md`.
+Date: 2026-11-17. Branch `m2-release`, cut from `master` after PR #3. It holds the handoff commit plus the M2 commits listed at the end. Nothing has been pushed, and no tag, GitHub release or upload was made. The handoff is in `docs/history/handoff-m2.md`.
 
 **The workflows have not run on GitHub.** The branch is not pushed, so criteria 1, 2, 3, 5 and 9 depend on CI and are checked only by running each job's steps locally, on macOS. They pass locally. They become "pass" once the owner pushes the branch, opens a pull request and CI goes green.
 

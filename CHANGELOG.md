@@ -2,6 +2,19 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [semantic versioning](https://semver.org/) with PEP 440 version numbers.
 
+## [0.1.0] - 2026-11-18
+
+The first final release: `pip install streamlit-a2ui`. The same package as `0.1.0rc1` with one fix and documentation changes. Pre-1.0: the API and the supported versions may change before 1.0. A2UI 1.0 only, with the official basic catalog, on the pinned `@a2ui/react` and `@a2ui/web_core` 0.15.0. Requires Python 3.10 or newer and Streamlit 1.59 or newer. The known limitations and security notes of `0.1.0rc1` below still apply.
+
+### Fixed
+
+- The first page load in a new environment no longer waits 20 seconds or more for the surface. Streamlit's check for dataframes in the component's data imported pandas and pyarrow on the first call; the message log is now passed in a form the check skips. Measured on macOS with Streamlit 1.67: from about 23 seconds to under 2 seconds for the first surface after a fresh install.
+
+### Changed
+
+- README: install with a plain `pip install streamlit-a2ui`; the `0.1.0rc1` page wrongly said a plain install finds nothing before a final release.
+- Development: the command list moved to `CONTRIBUTING.md`, milestone records to `docs/history/`, and the branches follow gitflow (`develop`, `feature/*`, `release/*`, `hotfix/*`).
+
 ## [0.1.0rc1] - 2026-11-18
 
 The first release candidate, and the first release on PyPI (`pip install --pre streamlit-a2ui`). Pre-1.0: the API and the supported versions may change before 1.0. A2UI 1.0 only, with the official basic catalog. Requires Python 3.10 or newer and Streamlit 1.59 or newer.
@@ -38,4 +51,5 @@ The first release candidate, and the first release on PyPI (`pip install --pre s
 - A release workflow publishes a `v*` tag to PyPI through Trusted Publishing, after the maintainer approves the `pypi` environment. No API token is stored anywhere. This is its first release.
 - The version is defined once, in `pyproject.toml`.
 
+[0.1.0]: https://github.com/josechudev/streamlit-a2ui/tree/v0.1.0
 [0.1.0rc1]: https://github.com/josechudev/streamlit-a2ui/tree/v0.1.0rc1

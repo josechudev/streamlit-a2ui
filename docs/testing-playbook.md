@@ -49,7 +49,7 @@ CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request on two legs (
 | G6 | Import outside `streamlit run` | `.venv/bin/python -c "from streamlit_a2ui import renderer_capabilities; print(renderer_capabilities())"` | Prints the `1.0` capabilities with the basic catalog ID; no `StreamlitAPIException` |
 | G7 | The sdist rebuilds the same wheel without Node | `uv build --sdist --out-dir dist && uv build --wheel --out-dir dist`, then `env PATH="$(dirname "$(command -v uv)"):/usr/bin:/bin" uv build --wheel --out-dir /tmp/from-sdist dist/*.tar.gz` (check `command -v node` finds nothing under that `PATH` first), then `python3 scripts/compare_wheels.py dist/*.whl /tmp/from-sdist/*.whl` | `identical: N files, same names and SHA-256 digests` |
 | G8 | Metadata | `uvx twine@7.0.0 check --strict dist/*` | `PASSED` for the wheel and the sdist |
-| G9 | The installed wheel works without the source tree | The installed-wheel commands in `CLAUDE.md` ("Commands"): fresh venv, install `dist/*.whl`, import from `/tmp`, `pytest e2e` with that venv | `__file__` is in the venv's `site-packages`; 1 e2e test passes |
+| G9 | The installed wheel works without the source tree | The installed-wheel commands in `CONTRIBUTING.md` ("Installed-wheel smoke test"): fresh venv, install `dist/*.whl`, import from `/tmp`, `pytest e2e` with that venv | `__file__` is in the venv's `site-packages`; 1 e2e test passes |
 
 ## 3. Manual click-through: basic example (about 5 minutes)
 
@@ -57,7 +57,7 @@ CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request on two legs (
 .venv/bin/streamlit run examples/basic_app.py
 ```
 
-Open the URL it prints. Keep the browser's developer console open on the Console tab. In M3's check of the PyPI install, the very first page load in a brand-new venv stayed on the title for over 45 seconds with no error in the server log or the console, and a reload rendered it at once (cause not investigated). If that happens, reload once and note it.
+Open the URL it prints. Keep the browser's developer console open on the Console tab. The surface should appear within a few seconds, even on the first run in a brand-new venv. Up to `0.1.0rc1`, the first page load there stayed on the title for 20–45 seconds: Streamlit's dataframe check on the component's data imported pandas and pyarrow for the first time. Fixed in `0.1.0`; if a first load takes more than about 5 seconds, note it as a bug.
 
 | # | Do | Expected |
 |---|---|---|
@@ -92,7 +92,7 @@ Stop the first app (Ctrl+C), then:
 | # | Do | Expected |
 |---|---|---|
 | R1 | With an example open, rebuild the frontend (`npm run build`) and restart Streamlit **without** reloading the tab | The component shows "Another build of streamlit-a2ui is already loaded on this page. Reload the page." Reloading fixes it. No blank component, no uncaught exception |
-| R2 | In the basic example, click **Send** twice very fast | Record how many actions arrive. A second action can replace the first (known, unmeasured; see the M3 item in `docs/release-plan.md`). Do not file it as a new bug |
+| R2 | In the basic example, click **Send** twice very fast | Record how many actions arrive. A second action replaces the first (known: in M3 a double or triple click returned one action; see the README Limitations). Do not file it as a new bug |
 | R3 | Open the page in a second browser (Firefox or Safari) and repeat B1–B5 | Same results. Record the browser; M1 checked only a Chromium-based one |
 
 ## 6. Clean clone (criterion 1, about 10 minutes)

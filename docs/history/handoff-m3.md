@@ -6,7 +6,7 @@ Written 2026-11-17 at the owner's request, from the M3 section of `docs/release-
 
 `streamlit-a2ui` renders Google's A2UI 1.0 protocol in Streamlit by wrapping the official web renderer (`@a2ui/react` + `@a2ui/web_core` 0.15.0) in a Streamlit Components v2 component.
 
-- **M2 is merged** (PR #4). The package is releasable: version `0.1.0rc1`, defined once in the root `pyproject.toml`; Streamlit floor `>=1.59`; Python `>=3.10`. CI has two test legs plus a `package` job and a `wheel-smoke` job, all green on PR #4 and on `master` (`docs/m2-report.md`).
+- **M2 is merged** (PR #4). The package is releasable: version `0.1.0rc1`, defined once in the root `pyproject.toml`; Streamlit floor `>=1.59`; Python `>=3.10`. CI has two test legs plus a `package` job and a `wheel-smoke` job, all green on PR #4 and on `master` (`docs/history/m2-report.md`).
 - **`release.yml` has never run.** A `v*` tag builds, checks and then publishes from a separate job in the `pypi` environment, with PyPI Trusted Publishing. `workflow_dispatch` is a dry run that stops before publishing.
 - **The owner's one-time setup is done:**
   - PyPI pending publisher: project `streamlit-a2ui`, repository `josechudev/streamlit-a2ui`, workflow `release.yml`, environment `pypi`.
@@ -19,7 +19,7 @@ Written 2026-11-17 at the owner's request, from the M3 section of `docs/release-
 
 M3 publishes the first release candidate and checks the package against a real agent. It does not publish `0.1.0` and does not add agent integrations to the package.
 
-Read these first: `CLAUDE.md`, `docs/release-plan.md` (M3 section), `docs/m2-report.md`, `CONTRIBUTING.md` (release process), `docs/upstream-issues.md` and `docs/testing-playbook.md`. Where this file and `CLAUDE.md` disagree, this file wins, and `CLAUDE.md` is brought in line.
+Read these first: `CLAUDE.md`, `docs/release-plan.md` (M3 section), `docs/history/m2-report.md`, `CONTRIBUTING.md` (release process), `docs/upstream-issues.md` and `docs/testing-playbook.md`. Where this file and `CLAUDE.md` disagree, this file wins, and `CLAUDE.md` is brought in line.
 
 ## Decisions (treat as settled)
 
@@ -37,7 +37,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M3 section), `docs/m2-rep
 
 Work on a branch cut from `master`, in small commits with one concern each. `master` is protected, so everything lands through a pull request with the four checks green. Push or open a pull request only when the owner asks; push with an explicit refspec (`git push origin <branch>`).
 
-1. **Bring the docs in line with the post-M2 state.** `CLAUDE.md` (M3 milestone, narrowed publishing ban, repository facts) and `docs/m2-report.md` (the CI runs for PR #4; criteria 1, 2, 3 and 9 pass on GitHub, criterion 5 stays "not run") were updated together with this handoff. Still to do:
+1. **Bring the docs in line with the post-M2 state.** `CLAUDE.md` (M3 milestone, narrowed publishing ban, repository facts) and `docs/history/m2-report.md` (the CI runs for PR #4; criteria 1, 2, 3 and 9 pass on GitHub, criterion 5 stays "not run") were updated together with this handoff. Still to do:
    - `docs/release-plan.md`: M2 done; the repository went public in M3; M4 no longer flips visibility.
    - `CONTRIBUTING.md`: the one-time setup is done; add the rulesets and how to re-tag after a failed run that uploaded nothing.
    - `docs/security.md`: status line (M3, repository public).
@@ -103,7 +103,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
     - Copy the two examples from the tag (`git show v0.1.0rc1:examples/basic_app.py`) into an empty folder; they are not in the wheel.
     - Run both from that folder and click through playbook parts 3 and 4 in a browser, or mark them "needs owner verification".
     - Repeat the real-agent round trip (step 3) against the PyPI install.
-12. **Report.** Write `docs/m3-report.md`, then stop and wait for the owner's review.
+12. **Report.** Write `docs/history/m3-report.md`, then stop and wait for the owner's review.
 
 ## Acceptance criteria
 
@@ -114,7 +114,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
 5. `streamlit-a2ui 0.1.0rc1` is on PyPI, published by `release.yml` from tag `v0.1.0rc1`. The owner pushed the tag and approved the `pypi` environment. The files on PyPI match the run's artifact by SHA-256. Claude Code created no tag, uploaded nothing and created no GitHub release.
 6. In a fresh environment outside the checkout, `0.1.0rc1` installed from PyPI imports from `site-packages`, and both examples pass playbook parts 3 and 4 in a browser, or are marked "needs owner verification".
 7. All tests and linters pass locally and in CI. Nothing in the Architecture or Security sections of `CLAUDE.md` changed without an ADR and the owner's approval.
-8. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md`, `docs/upstream-issues.md` and `docs/m3-report.md` exist and agree with each other.
+8. `CLAUDE.md`, `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/architecture.md`, `docs/security.md`, `docs/testing-playbook.md`, `docs/release-plan.md`, `docs/upstream-issues.md` and `docs/history/m3-report.md` exist and agree with each other.
 
 ## Constraints
 
@@ -156,7 +156,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
 - **`a2ui-agent-sdk` speaks several protocol versions** (0.8, 0.9 and 1.0; 0.12.0 on 2026-11-17). Select 1.0 explicitly; capabilities travel under `a2uiRendererCapabilities` in 1.0 and `a2uiClientCapabilities` in 0.8 and 0.9. Its 1.0 schemas may be newer than `web_core` 0.15.0's. A message our renderer rejects may be spec drift rather than a package bug; record it, do not upgrade the pins.
 - **Trust installed code, not docs or memory.** Check the SDK's and ADK's installed sources for current APIs; these packages move fast.
 - **Threads and Streamlit.** If the agent runs in a background thread, the thread may only append to a plain list held in `st.session_state`; it never calls `st.*`. The fragment drains the list on each tick (`examples/streaming_app.py`).
-- **Fragment trigger scope.** An action fired inside `@st.fragment` reruns only the fragment, and the returned message is visible only there (`docs/notes-m1.md`).
+- **Fragment trigger scope.** An action fired inside `@st.fragment` reruns only the fragment, and the returned message is visible only there (`docs/history/notes-m1.md`).
 - **`callAgentFunction` times out after 30 seconds** in `web_core`. A slow model can exceed it; record it if it happens.
 - **Re-tagging.** The `release tag` ruleset blocks updating or deleting `v*` tags. Only the owner can disable it, and only before anything reaches PyPI.
 - **The dry run never reaches the `pypi` environment.** The environment accepts only `v*` tags, and the publish job runs only on a tag push.
@@ -170,7 +170,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
   - After a rebuild, restart Streamlit and reload the page.
   - `.claude/` is local and never committed.
 
-## Deliverable: `docs/m3-report.md`
+## Deliverable: `docs/history/m3-report.md`
 
 - Each acceptance criterion: pass, fail or needs owner verification, with how it was checked. Include the CI, dry-run and release run links, and the PyPI URL.
 - The upstream issue URLs.
