@@ -126,6 +126,7 @@ The project follows gitflow:
 - `feature/<topic>`: cut from `develop`, merged into `develop` by pull request.
 - `release/<version>` (for example `release/0.1.0`): cut from `develop` when it is ready to release. It carries only the version bump, the dated CHANGELOG section and fixes found while releasing. Merged into `master` by pull request; after the tag, `master` is merged back into `develop`.
 - `hotfix/<version>` (for example `hotfix/0.1.1`): cut from `master` for a bug in a released version, with a test. Merged into `master` by pull request, tagged, then merged back into `develop`.
+- `hotfix/<topic>` (for example `hotfix/readme-gif`): a docs-only fix that must reach `master` before the next release, because a published README links it there (images and pages on `master`). Cut from `master`, merged by pull request, then merged back into `develop`. No version bump and no tag.
 
 Every merge goes through a pull request with the four CI checks green. Dependabot's version updates target `develop`.
 
