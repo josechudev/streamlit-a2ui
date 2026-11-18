@@ -57,7 +57,7 @@ CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request on two legs (
 .venv/bin/streamlit run examples/basic_app.py
 ```
 
-Open the URL it prints. Keep the browser's developer console open on the Console tab. In M3's check of the PyPI install, the very first page load in a brand-new venv stayed on the title for over 45 seconds with no error in the server log or the console, and a reload rendered it at once (cause not investigated). If that happens, reload once and note it.
+Open the URL it prints. Keep the browser's developer console open on the Console tab. The surface should appear within a few seconds, even on the first run in a brand-new venv. Up to `0.1.0rc1`, the first page load there stayed on the title for 20–45 seconds: Streamlit's dataframe check on the component's data imported pandas and pyarrow for the first time. Fixed in `0.1.0`; if a first load takes more than about 5 seconds, note it as a bug.
 
 | # | Do | Expected |
 |---|---|---|
