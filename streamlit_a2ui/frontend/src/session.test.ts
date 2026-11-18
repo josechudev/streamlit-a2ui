@@ -167,6 +167,35 @@ describe("LogSession", () => {
     expect(snapshot.hasRoot).toBe(true);
   });
 
+  it("rejects a function the catalog does not define", async () => {
+    const { session } = trackedSession();
+    const surfaceId = "gallery-simple-login-form";
+    const call = {
+      version: "1.0",
+      updateComponents: {
+        surfaceId,
+        components: [
+          {
+            id: "form_title",
+            component: "Text",
+            text: { "@call": "noSuchFunction", args: {} },
+          },
+        ],
+      },
+    };
+
+    session.sync([...login, call]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const snapshot = session.getSnapshot();
+    expect(snapshot.noticeCount).toBe(1);
+    expect(snapshot.notices[0]).toMatchObject({
+      code: "VALIDATION_FAILED",
+      surfaceId,
+    });
+    expect(snapshot.notices[0].message).toContain("noSuchFunction");
+  });
+
   it("accepts a surface streamed out of order: children first, root last", async () => {
     const { session } = trackedSession();
     const surfaceId = "streamed";
