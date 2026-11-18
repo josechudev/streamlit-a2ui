@@ -8,7 +8,7 @@ Personal open-source project. Never add employer code, names, hostnames or data.
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 is defined in `docs/handoff-m3.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 is defined in `docs/handoff-m3.md`; its work is done and `docs/m3-report.md` waits for the owner's review. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
 Push or open a pull request only when the owner asks. Work on a branch cut from `master`; `master` is protected, so changes land through a pull request with the four CI checks green. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from `origin/master` tracks it.
 
@@ -122,11 +122,11 @@ Claude Code never changes these settings; they are the owner's.
 | `master` ruleset | no deletion or force-push; pull request required (0 approvals); required checks `Test (py3.10 / streamlit floor)`, `Test (py3.13 / streamlit latest)`, `Build wheel and sdist`, `Installed wheel smoke test`; no bypass |
 | `release tag` ruleset | `refs/tags/v*`: no deletion, update or force-push; no bypass. To re-tag after a failed run that uploaded nothing, the owner disables it temporarily. Never re-tag a version already on PyPI |
 | GitHub environment `pypi` | owner is the required reviewer; admins cannot bypass; deployments only from tags `v*` |
-| PyPI | pending Trusted Publisher: project `streamlit-a2ui`, repository `josechudev/streamlit-a2ui`, workflow `release.yml`, environment `pypi`. The project does not exist yet; a pending publisher does not reserve the name |
+| PyPI | project `streamlit-a2ui`, created by the first Trusted Publishing upload (`0.1.0rc1`); publisher: repository `josechudev/streamlit-a2ui`, workflow `release.yml`, environment `pypi` |
 | Security settings | private vulnerability reporting, secret scanning with push protection, Dependabot alerts and security updates, SHA pinning of actions required, read-only default workflow token, merged branches auto-deleted |
 | Topics | `a2ui`, `python`, `streamlit`, `streamlit-component` |
 | Dependabot | React, `react-dom` and their types grouped; React and `@types/node` majors held (React stays 18 until after 0.1.0); `@types/node` `^24`. The red "Dependabot Updates" runs for `zod` end in `security_update_not_possible`: expected, the accepted advisory in `docs/security.md` |
-| Tags, releases | none yet. `streamlit-a2ui` is not on PyPI |
+| Tags, releases | `v0.1.0rc1` (annotated, on `388f2a7`), published to PyPI on 2026-11-18 by release run 44248941528. No GitHub release (that is M4, for `0.1.0`) |
 
 ## Security rules (non-negotiable)
 
@@ -236,7 +236,7 @@ uv pip install --python .venv-floor -e . "streamlit==1.59.*" pytest==9.2.0 ruff=
 gh workflow run release.yml --ref <branch>
 
 # install a published release candidate from PyPI (M3): fresh venv, no cache, outside the checkout.
-# Pre-releases need --pre or an exact pin with pip, --prerelease=allow or an exact pin with uv.
+# Use the exact pin: pip and uv pick a pre-release without --pre only while no final release exists.
 uv venv --python 3.13 /tmp/a2ui-pypi
 uv pip install --python /tmp/a2ui-pypi --no-cache "streamlit-a2ui==0.1.0rc1"
 (cd /tmp && /tmp/a2ui-pypi/bin/python -c "import streamlit_a2ui, importlib.metadata as m; print(streamlit_a2ui.__file__, m.version('streamlit-a2ui'))")
