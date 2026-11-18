@@ -13,6 +13,7 @@ The first release candidate. A2UI 1.0 only, with the official basic catalog. Req
 - The browser processes only the part of the log it has not seen, and replays from the start when the log is shortened or rewritten.
 - Streaming across reruns with `@st.fragment(run_every=...)`; see `examples/streaming_app.py`.
 - Processing and rendering errors are shown as a plain-text notice inside the component and logged with `console.warn`; nothing is sent to Python.
+- A component type the basic catalog does not define is rejected with a `VALIDATION_FAILED` notice, instead of being stored and rendering nothing. Surfaces may still stream in out of order (children before the root, references to components that have not arrived yet).
 - A per-surface error boundary: an exception while one surface renders shows a notice in its place and leaves the other surfaces rendered.
 - Theming follows the Streamlit theme through CSS variables, in light and dark mode.
 - `THIRD_PARTY_LICENSES.txt` with the licenses of the bundled JavaScript, shipped in the wheel.

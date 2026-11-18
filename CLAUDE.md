@@ -105,7 +105,7 @@ API notes that are easy to get wrong:
 - Since 0.15.0 a surface renders nothing until its root component arrives. Render our own minimal waiting state.
 - Basic catalog components are custom elements registered globally on the page. `web_core` registration is idempotent for one bundle but throws for a second copy, so `index.tsx` claims the page with a global symbol and a later copy renders a notice instead. Never load two versions of the bundle.
 - Surface errors are re-emitted on `processor.model.onError`. Subscribe there only, or each error is reported twice.
-- `@a2ui/web_core` 0.15.0 does not reject unknown component types; a `Text` without `text` is a reliable invalid message for tests.
+- `@a2ui/web_core` 0.15.0 rejects unknown component types only when the processor has a `validationConfig`. `session.ts` passes `VALIDATION` (`RELAXED_VALIDATION` with `allowUnknownElements: false`): relaxed so surfaces can stream in out of order, strict about types. Never pass `STRICT_VALIDATION`: it rejects a surface whose root has not arrived yet. A `Text` without `text`, or an unknown component type, is a reliable invalid message for tests.
 - The production build sets `dropConsole: true` (template default). The one `console.warn` we keep goes through a reference bound in `session.ts`, which the minifier leaves alone.
 - The component is registered on first call, not at import: Streamlit resolves `asset_dir` only once its runtime has started, so import-time registration breaks `import streamlit_a2ui` outside `streamlit run`.
 - A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/notes-m1.md`).
