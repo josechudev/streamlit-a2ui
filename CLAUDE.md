@@ -162,7 +162,7 @@ Generate from Streamlit's official v2 React template; do not hand-write the pack
 uvx --from cookiecutter cookiecutter gh:streamlit/component-template --directory cookiecutter/v2
 ```
 
-Use package name `streamlit-a2ui`, module `streamlit_a2ui`, component `a2ui_surface`. Read the generated README for the dev/build commands and record them in the Commands section below once confirmed; do not guess them.
+Use package name `streamlit-a2ui`, module `streamlit_a2ui`, component `a2ui_surface`. Read the generated README for the dev/build commands and record them in `CONTRIBUTING.md` ("Build and test") once confirmed; do not guess them.
 
 Expected shape after generation (adjust to what the template actually produces):
 
@@ -199,71 +199,16 @@ docs/upstream-issues.md    drafts of issues to file upstream
 
 ## Commands
 
-Prerequisites: uv, Node 24 (via nvm if the system Node is older), npm. Package only from `npm run build`: `npm run dev` writes source maps into the publicly served `asset_dir`, and the build check fails on them.
+The command list (frontend, Python, browser test, wheel and sdist, installed wheel, Streamlit floor, install from PyPI) and the CI description are in `CONTRIBUTING.md` under "Build and test"; the release steps are under "Release process". Keep `CONTRIBUTING.md` and `.github/workflows/ci.yml` in step.
 
-```
-# frontend (from streamlit_a2ui/frontend)
-npm install
-npm run build        # clean + tsc + vite build → build/ (the asset_dir), fail on source maps,
-                     # then write ../renderer_capabilities.json and ../THIRD_PARTY_LICENSES.txt
-npm run dev          # vite build --watch; emits source maps into build/
-npm run typecheck
-npm test             # Vitest unit tests (src/*.test.ts)
-npm run format:check # Prettier, as CI runs it
+Local notes for Claude Code on the owner's machine:
 
-# python (from repo root)
-uv venv
-uv pip install -e . --force-reinstall
-uv pip install pytest ruff
-.venv/bin/streamlit run examples/basic_app.py
-.venv/bin/streamlit run examples/streaming_app.py
-.venv/bin/pytest -q            # needs npm run build first: builds and inspects the wheel
-.venv/bin/ruff check . && .venv/bin/ruff format --check .
-
-# browser smoke test (e2e/, not in the default pytest run)
-uv pip install pytest-playwright
-.venv/bin/playwright install chromium
-.venv/bin/pytest e2e -q          # starts examples/basic_app.py, clicks Send, checks the round trip
-
-# wheel and sdist (after npm run build). Build them separately: a bare `uv build`
-# makes the wheel from the sdist, leaving nothing to compare.
-uv build --sdist --out-dir dist
-uv build --wheel --out-dir dist
-uvx twine@7.0.0 check --strict dist/*
-# the sdist must rebuild the same wheel without Node (CI runs this with a PATH that has no node)
-uv build --wheel --out-dir /tmp/from-sdist dist/*.tar.gz
-python3 scripts/compare_wheels.py dist/*.whl /tmp/from-sdist/*.whl
-
-# installed-wheel smoke test: the wheel, not the source tree (the e2e server runs from a temp dir)
-uv venv --python 3.13 /tmp/a2ui-wheel
-uv pip install --python /tmp/a2ui-wheel dist/*.whl pytest==9.2.0 pytest-playwright==0.10.0 playwright==1.65.2
-(cd /tmp && /tmp/a2ui-wheel/bin/python -c "import streamlit_a2ui; print(streamlit_a2ui.__file__, streamlit_a2ui.renderer_capabilities())")
-/tmp/a2ui-wheel/bin/playwright install chromium
-/tmp/a2ui-wheel/bin/pytest e2e -q
-
-# version matrix, floor leg (CI's other leg is Python 3.13 with the latest Streamlit)
-uv venv --python 3.10 .venv-floor
-uv pip install --python .venv-floor -e . "streamlit==1.59.*" pytest==9.2.0 ruff==0.17.5 pytest-playwright==0.10.0 playwright==1.65.2
-.venv-floor/bin/pytest -q && .venv-floor/bin/pytest e2e -q
-
-# release dry run: builds and checks, never publishes (the owner runs it, or asks for it; needs the branch pushed)
-gh workflow run release.yml --ref <branch>
-
-# install a published release candidate from PyPI (M3): fresh venv, no cache, outside the checkout.
-# Use the exact pin: pip and uv pick a pre-release without --pre only while no final release exists.
-uv venv --python 3.13 /tmp/a2ui-pypi
-uv pip install --python /tmp/a2ui-pypi --no-cache "streamlit-a2ui==0.1.0rc1"
-(cd /tmp && /tmp/a2ui-pypi/bin/python -c "import streamlit_a2ui, importlib.metadata as m; print(streamlit_a2ui.__file__, m.version('streamlit-a2ui'))")
-# the examples are not in the wheel: take them from the tag into an empty folder and run them there
-mkdir -p /tmp/a2ui-pypi-examples && git show v0.1.0rc1:examples/basic_app.py > /tmp/a2ui-pypi-examples/basic_app.py
-(cd /tmp/a2ui-pypi-examples && /tmp/a2ui-pypi/bin/streamlit run basic_app.py)
-```
-
-CI (`.github/workflows/ci.yml`) runs all of the above on every pull request and on pushes to `master`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`), and Python 3.13 with the latest Streamlit (`>=1.67`). A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check`, and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the e2e test against it. Keep the workflow in step with these commands. Third-party actions are pinned to a commit SHA. `release.yml` publishes on a `v*` tag, after the owner approves the `pypi` environment; only the owner creates and pushes tags.
-
-If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clean` and rebuild. Before building a wheel locally, delete the setuptools cache `build/` at the repo root: it keeps old bundles and setuptools ships them (CI checkouts are clean; `tests/test_wheel.py` fails on a second bundle). After a rebuild, restart Streamlit and reload the page: the first bundle loaded claims the page's custom elements, and a second copy only shows a notice.
-
-`renderer_capabilities.json` and `THIRD_PARTY_LICENSES.txt` are generated, git-ignored and shipped in the wheel. Never hand-edit them.
+- Node 24 is at `~/.nvm/versions/node/v24.15.0/bin`; the system Node is 23 and `nvm.sh` is missing. `export PATH=~/.nvm/versions/node/v24.15.0/bin:$PATH` before `npm`.
+- Delete the setuptools cache `build/` at the repo root before building a wheel locally.
+- After a rebuild, restart Streamlit and reload the page.
+- Never name a workflow environment variable `STREAMLIT_*`: Streamlit reads those as config.
+- Release dry run (the owner runs it, or asks for it): `gh workflow run release.yml --ref master`. It never publishes.
+- Use your scratchpad, not `/tmp`, for the throwaway venvs in `CONTRIBUTING.md`.
 
 ## Conventions
 

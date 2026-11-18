@@ -49,7 +49,7 @@ CI (`.github/workflows/ci.yml`) runs A1–A6 on every pull request on two legs (
 | G6 | Import outside `streamlit run` | `.venv/bin/python -c "from streamlit_a2ui import renderer_capabilities; print(renderer_capabilities())"` | Prints the `1.0` capabilities with the basic catalog ID; no `StreamlitAPIException` |
 | G7 | The sdist rebuilds the same wheel without Node | `uv build --sdist --out-dir dist && uv build --wheel --out-dir dist`, then `env PATH="$(dirname "$(command -v uv)"):/usr/bin:/bin" uv build --wheel --out-dir /tmp/from-sdist dist/*.tar.gz` (check `command -v node` finds nothing under that `PATH` first), then `python3 scripts/compare_wheels.py dist/*.whl /tmp/from-sdist/*.whl` | `identical: N files, same names and SHA-256 digests` |
 | G8 | Metadata | `uvx twine@7.0.0 check --strict dist/*` | `PASSED` for the wheel and the sdist |
-| G9 | The installed wheel works without the source tree | The installed-wheel commands in `CLAUDE.md` ("Commands"): fresh venv, install `dist/*.whl`, import from `/tmp`, `pytest e2e` with that venv | `__file__` is in the venv's `site-packages`; 1 e2e test passes |
+| G9 | The installed wheel works without the source tree | The installed-wheel commands in `CONTRIBUTING.md` ("Installed-wheel smoke test"): fresh venv, install `dist/*.whl`, import from `/tmp`, `pytest e2e` with that venv | `__file__` is in the venv's `site-packages`; 1 e2e test passes |
 
 ## 3. Manual click-through: basic example (about 5 minutes)
 
