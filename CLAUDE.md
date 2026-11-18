@@ -10,7 +10,14 @@ Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
 **Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 merged on 2026-11-18 as PRs #10–#15 (`docs/m3-report.md`). M4 is defined in `docs/handoff-m4.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
-Push or open a pull request only when the owner asks. Work on a branch cut from `master`; `master` is protected, so changes land through a pull request with the four CI checks green. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from `origin/master` tracks it.
+Push or open a pull request only when the owner asks. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from a remote branch tracks it.
+
+**Branches: gitflow (owner's decision, 2026-11-18; details in `CONTRIBUTING.md`).** `master` holds released code only, and every `v*` tag is on a `master` merge commit. `develop` is the integration branch. Name branches by kind:
+- `feature/<topic>`: cut from `develop`, pull request into `develop`. All ordinary work, docs included.
+- `release/<version>` (for example `release/0.1.0`): cut from `develop`; only the version bump, the dated CHANGELOG section and release fixes; pull request into `master`; after the tag, `master` is merged back into `develop` by pull request.
+- `hotfix/<version>` (for example `hotfix/0.1.1`): cut from `master`; the fix with its test, the version bump and the CHANGELOG section; pull request into `master`; after the tag, merged back into `develop`.
+
+Every merge goes through a pull request with the four CI checks green; no direct pushes to `master` or `develop`.
 
 **Publishing.** M4 publishes `0.1.0` (and, during the watch week, bug-fix `0.1.x` releases), and it happens only one way: `release.yml`, triggered by a `v*` tag that the owner creates and pushes, publishing after the owner approves the `pypi` environment. Claude Code never creates or pushes a tag, never uploads to PyPI or TestPyPI, never runs `twine upload` or `uv publish`, and never runs `release.yml` except as a `workflow_dispatch` dry run the owner asks for.
 
@@ -129,6 +136,7 @@ Claude Code never changes these settings; they are the owner's.
 |---|---|
 | Repository | `josechudev/streamlit-a2ui`, **public** (since M3, not M4: GitHub Free has no environment reviewers on private repositories; a full-history secret and employer-data scan was clean first) |
 | `master` ruleset | no deletion or force-push; pull request required (0 approvals); required checks `Test (py3.10 / streamlit floor)`, `Test (py3.13 / streamlit latest)`, `Build wheel and sdist`, `Installed wheel smoke test`; no bypass |
+| `develop` branch | created 2026-11-18 from `master` (`9cc0a23`) for gitflow. Not protected until the owner adds a `develop` ruleset matching `master`'s; until then, never push to it directly either |
 | `release tag` ruleset | `refs/tags/v*`: no deletion, update or force-push; no bypass. To re-tag after a failed run that uploaded nothing, the owner disables it temporarily. Never re-tag a version already on PyPI |
 | GitHub environment `pypi` | owner is the required reviewer; admins cannot bypass; deployments only from tags `v*` |
 | PyPI | project `streamlit-a2ui`, created by the first Trusted Publishing upload (`0.1.0rc1`); publisher: repository `josechudev/streamlit-a2ui`, workflow `release.yml`, environment `pypi` |

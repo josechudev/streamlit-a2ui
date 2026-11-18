@@ -41,7 +41,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/m3-rep
 
 ## Steps
 
-Work on a branch cut from `master`, in small commits with one concern each. `master` is protected, so everything lands through a pull request with the four checks green. Push or open a pull request only when the owner asks; push with an explicit refspec (`git push origin <branch>`).
+Branches follow gitflow (owner's decision, 2026-11-18; `CONTRIBUTING.md`): (a), (b) and the drafts on `feature/*` branches into `develop`; the release commit on `release/0.1.0` into `master`; watch-week fixes on `hotfix/0.1.x` from `master`. After each tag, `master` is merged back into `develop` by pull request. Small commits with one concern each; everything lands through a pull request with the four checks green. Push or open a pull request only when the owner asks; push with an explicit refspec (`git push origin <branch>`).
 
 ### (a) First-load delay
 
@@ -70,7 +70,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
 
 ### (c) `0.1.0`
 
-6. **Release commit,** after (a) and (b) are merged or included:
+6. **Release branch** `release/0.1.0`, cut from `develop` after (a) and (b) are merged into it:
    - `README.md`:
      - Install: `pip install streamlit-a2ui`. Replace the pre-release paragraph with one true sentence: a plain install gets the latest final release; `--pre` (pip), `--prerelease=allow` (uv) or an exact pin gets a release candidate.
      - Status: pre-1.0 (`0.1.0`), API and supported versions may change before 1.0. Drop "release candidate" from the text and the badge.
@@ -78,9 +78,9 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
    - `CHANGELOG.md`: a `[0.1.0] - <date>` section above `[0.1.0rc1]` with what changed since rc1 (docs, the README fix, anything from (a)), and a `[0.1.0]` link to `https://github.com/josechudev/streamlit-a2ui/tree/v0.1.0`. Keep the rc1 section as it is.
    - `pyproject.toml`: `version = "0.1.0"`. Leave the `Development Status :: 4 - Beta` classifier unless the owner says otherwise.
    - Run everything locally (`CONTRIBUTING.md`), including `twine check --strict`, the Node-free sdist comparison, the installed-wheel test and the e2e test.
-   - Open the pull request when the owner asks; the owner merges it once the four checks are green.
-7. **Dry run (owner).** `gh workflow run release.yml --ref master` on the merge commit. Check: build and check succeeded, `identical: N files`, twine `PASSED`, `package version: 0.1.0`, Publish to PyPI skipped. Record the run link and the commit.
-8. **Tag and approve (owner only).** Annotated tag `v0.1.0` on the commit the dry run built (`git tag -a v0.1.0 -m v0.1.0 <sha>`), pushed with `git push origin v0.1.0`; approve the `pypi` deployment on the web page. If the run fails before anything reaches PyPI, `CONTRIBUTING.md` says how the owner re-tags.
+   - Open the pull request into `master` when the owner asks; the owner merges it once the four checks are green.
+7. **Dry run (owner).** `gh workflow run release.yml --ref master` on the `master` merge commit. Check: build and check succeeded, `identical: N files`, twine `PASSED`, `package version: 0.1.0`, Publish to PyPI skipped. Record the run link and the commit.
+8. **Tag and approve (owner only).** Annotated tag `v0.1.0` on the commit the dry run built (`git tag -a v0.1.0 -m v0.1.0 <sha>`), pushed with `git push origin v0.1.0`; approve the `pypi` deployment on the web page. If the run fails before anything reaches PyPI, `CONTRIBUTING.md` says how the owner re-tags. After the release, `master` is merged back into `develop` by pull request.
 9. **Verify the publication:** release run link; SHA-256 of each file on PyPI equals the run's `dist` artifact; PEP 740 attestations name this repository, `release.yml` and `pypi`; the PyPI JSON API shows the new README with no relative links and every absolute link returning 200. PyPI's HTML page shows the built-in browser a bot check: do not bypass it; the owner looks at the page.
 10. **Install from PyPI in a fresh environment,** as in M3 step 11: a brand-new venv outside the checkout, `--no-cache`, `streamlit-a2ui==0.1.0`; check that it imports from `site-packages`, the version is `0.1.0` and `renderer_capabilities()` works. Also check that a plain `uv pip install streamlit-a2ui` and `pip install --dry-run --report - streamlit-a2ui` now pick `0.1.0`. Copy both examples from the tag (`git show v0.1.0:examples/…`) into an empty folder and click through playbook parts 3 and 4 in a browser, or mark them "needs owner verification". Note whether the first-load delay from (a) shows up.
 
@@ -122,7 +122,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
 ### (g) One-week watch
 
 18. **For seven days after the posts,** check the repository's issues, the listing pull requests and the two threads (the owner forwards what needs an answer; Claude Code reads public pages only). For each report:
-    - a bug in the package: reproduce, fix with a test, and release as `0.1.x` through steps 6–10 (CHANGELOG section, version bump, dry run, owner tag and approval, fresh install);
+    - a bug in the package: reproduce, fix with a test on `hotfix/0.1.x` cut from `master`, and release it through steps 6–10 (CHANGELOG section, version bump, pull request into `master`, dry run, owner tag and approval, fresh install), then merge `master` back into `develop`;
     - anything else (a feature, a catalog, the second-message limitation): answer with the backlog and record it in `docs/release-plan.md`, without building it.
 19. **Report.** Write `docs/history/m4-report.md` once `0.1.0` is on PyPI and the drafts are done, then stop for the owner's review. Append the watch-week result (issues, fixes, `0.1.x` releases or "none") as its last section at the end of the week.
 
