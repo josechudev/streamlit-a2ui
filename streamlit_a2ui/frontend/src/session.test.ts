@@ -144,6 +144,72 @@ describe("LogSession", () => {
     expect(session.getSnapshot().notices).toEqual([]);
   });
 
+  it("rejects a component type the catalog does not define", async () => {
+    const { session } = trackedSession();
+    const surfaceId = "gallery-simple-login-form";
+    const unknown = {
+      version: "1.0",
+      updateComponents: {
+        surfaceId,
+        components: [{ id: "x", component: "NoSuchThing", foo: 1 }],
+      },
+    };
+
+    session.sync([...login, unknown]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const snapshot = session.getSnapshot();
+    expect(snapshot.notices).toEqual([
+      expect.objectContaining({ code: "VALIDATION_FAILED", surfaceId }),
+    ]);
+    expect(snapshot.notices[0].message).toContain("NoSuchThing");
+    expect(snapshot.surfaces[0].componentsModel.get("x")).toBeUndefined();
+    expect(snapshot.hasRoot).toBe(true);
+  });
+
+  it("accepts a surface streamed out of order: children first, root last", async () => {
+    const { session } = trackedSession();
+    const surfaceId = "streamed";
+    const update = (components: WireMessage[]) => ({
+      version: "1.0",
+      updateComponents: { surfaceId, components },
+    });
+    const log: WireMessage[] = [
+      {
+        version: "1.0",
+        createSurface: {
+          surfaceId,
+          catalogId:
+            "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+        },
+      },
+      // An orphan, before anything refers to it.
+      update([{ id: "second", component: "Text", text: "Second" }]),
+      // The root, referring to a child that has not arrived yet.
+      update([
+        { id: "root", component: "Column", children: ["first", "second"] },
+      ]),
+      update([{ id: "first", component: "Text", text: "First" }]),
+    ];
+
+    for (let end = 1; end <= log.length; end++) {
+      session.sync(log.slice(0, end));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(session.getSnapshot().noticeCount).toBe(0);
+    }
+    expect(session.getSnapshot().hasRoot).toBe(true);
+  });
+
+  it.each(["00_simple-login-form", "00_incremental"])(
+    "accepts the web_core 1.0 sample %s without notices",
+    async (name) => {
+      const { session } = trackedSession();
+      session.sync(sample(name));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(session.getSnapshot().noticeCount).toBe(0);
+    },
+  );
+
   it("waits until a surface has its root component", () => {
     const { session } = trackedSession();
     session.sync(login.slice(0, 1));
