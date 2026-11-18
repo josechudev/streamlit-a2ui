@@ -6,6 +6,8 @@ Render [A2UI](https://a2ui.org) surfaces inside Streamlit apps.
 
 ![The basic example: a contact form rendered from A2UI messages, filled in and sent; the agent's reply updates the form and the returned action is shown below it](https://raw.githubusercontent.com/josechudev/streamlit-a2ui/master/docs/images/basic-example.gif)
 
+*The form is an A2UI surface, drawn from the agent's messages by the official renderer. Press Send and `a2ui_surface` returns the action to Python (the JSON below); the scripted agent's reply updates the form in place.*
+
 A2UI is a protocol in which an agent describes a user interface as JSON messages and a renderer draws it with a trusted catalog of components. `streamlit-a2ui` wraps the official web renderer (`@a2ui/react` and `@a2ui/web_core`) in a Streamlit Components v2 component. You pass it the agent's messages; it draws the surface, and it returns the user's actions so you can send them back to the agent.
 
 It is for Python developers who already have an agent that speaks A2UI, or want one, and want to show its UI in a Streamlit app without writing frontend code.
