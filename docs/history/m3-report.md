@@ -1,6 +1,6 @@
 # M3 report: release candidate and real-agent check
 
-Dates: 2026-11-17 to 2026-11-18. The handoff is in `docs/handoff-m3.md`. M3 landed through PRs #10–#14 and the PR that adds this report, all on `master`.
+Dates: 2026-11-17 to 2026-11-18. The handoff is in `docs/history/handoff-m3.md`. M3 landed through PRs #10–#14 and the PR that adds this report, all on `master`.
 
 **Result:** `streamlit-a2ui 0.1.0rc1` is on PyPI, published by `release.yml` from tag `v0.1.0rc1`, which the owner pushed and approved. A real Google ADK agent drove a surface. Installed from PyPI in a fresh environment, the package passes both example click-throughs. No package bugs turned up from the agent. One gap was fixed: unknown component types and functions are now rejected. Claude Code created no tag, uploaded nothing and created no GitHub release.
 

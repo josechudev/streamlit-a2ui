@@ -8,7 +8,7 @@ Personal open-source project. Never add employer code, names, hostnames or data.
 
 Roadmap to 0.1.0: docs/release-plan.md. Work only on the current milestone.
 
-**Status:** M0 complete (`docs/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/m2-report.md`). M3 merged on 2026-11-18 as PRs #10–#15 (`docs/m3-report.md`). M4 is defined in `docs/handoff-m4.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
+**Status:** M0 complete (`docs/history/spike-report.md`). M1 merged to `master` on 2026-11-17 (`docs/history/m1-report.md`). M2 merged on 2026-11-17 as PR #4 (`docs/history/m2-report.md`). M3 merged on 2026-11-18 as PRs #10–#15 (`docs/history/m3-report.md`). M4 is defined in `docs/history/handoff-m4.md`. Where a handoff and this file disagree, the handoff wins and this file is brought in line.
 
 Push or open a pull request only when the owner asks. Push with an explicit refspec (`git push origin <branch>`), never a bare `git push`: a branch cut from a remote branch tracks it.
 
@@ -43,11 +43,11 @@ Work in other repositories (listing drafts, schema checks) happens in scratch cl
 
 ### M3 — release candidate and real-agent check (done)
 
-M3 published `0.1.0rc1` to PyPI through `release.yml` from tag `v0.1.0rc1` on `388f2a7` (owner-pushed and owner-approved; files byte-identical to the run's artifact, PEP 740 attestations), and checked the package against a real Google ADK agent on `a2ui-agent-sdk` 0.12.0 outside the repository: an action round trip and a streamed response worked, with no package bugs. It filed the upstream issues (a2ui-project/a2ui#4278, #4279, a comment on #4059), made the renderer reject unknown component types and functions, measured the second-message limitation (a double click returns one action), and added the README GIF and PyPI install. All eight criteria passed. The result is in `docs/m3-report.md`, the handoff in `docs/handoff-m3.md`.
+M3 published `0.1.0rc1` to PyPI through `release.yml` from tag `v0.1.0rc1` on `388f2a7` (owner-pushed and owner-approved; files byte-identical to the run's artifact, PEP 740 attestations), and checked the package against a real Google ADK agent on `a2ui-agent-sdk` 0.12.0 outside the repository: an action round trip and a streamed response worked, with no package bugs. It filed the upstream issues (a2ui-project/a2ui#4278, #4279, a comment on #4059), made the renderer reject unknown component types and functions, measured the second-message limitation (a double click returns one action), and added the README GIF and PyPI install. All eight criteria passed. The result is in `docs/history/m3-report.md`, the handoff in `docs/history/handoff-m3.md`.
 
 ### M2 — release engineering (done)
 
-M2 made the package releasable without releasing it: a two-leg CI matrix (Python 3.10 with Streamlit `1.59.*`, Python 3.13 with the latest), wheel and sdist built once with a Node-free sdist rebuild compared against the direct wheel, an installed-wheel browser test, the version single-sourced as `0.1.0rc1`, `release.yml` (written, never run), repository hygiene files, the per-surface error boundary, and a whitespace-stripped bundle. All ten criteria passed; criteria 1, 2, 3 and 9 on GitHub with PR #4, criterion 5 by review only. The result is in `docs/m2-report.md`, the handoff in `docs/handoff-m2.md`.
+M2 made the package releasable without releasing it: a two-leg CI matrix (Python 3.10 with Streamlit `1.59.*`, Python 3.13 with the latest), wheel and sdist built once with a Node-free sdist rebuild compared against the direct wheel, an installed-wheel browser test, the version single-sourced as `0.1.0rc1`, `release.yml` (written, never run), repository hygiene files, the per-surface error boundary, and a whitespace-stripped bundle. All ten criteria passed; criteria 1, 2, 3 and 9 on GitHub with PR #4, criterion 5 by review only. The result is in `docs/history/m2-report.md`, the handoff in `docs/history/handoff-m2.md`.
 
 ### M1 — harden the spike into v0.1 (done)
 
@@ -63,9 +63,9 @@ M1 passed when all nine held:
 6. One `dompurify` at 3.4.18 in the lockfile and in the bundle.
 7. The wheel has no source maps and no CDN references; the production bundle has no construction log.
 8. All tests and linters pass. Criteria 2, 3 and 4 were exercised in a browser, not inferred from code; otherwise they are marked "needs owner verification" with a click-through checklist.
-9. `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/0001`–`0009`, `docs/notes-m1.md` and `docs/m1-report.md` exist and agree with each other.
+9. `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/0001`–`0009`, `docs/history/notes-m1.md` and `docs/history/m1-report.md` exist and agree with each other.
 
-The result, and the owner's decisions on it, are in `docs/m1-report.md`.
+The result, and the owner's decisions on it, are in `docs/history/m1-report.md`.
 
 ## Architecture (decided; change only via an ADR)
 
@@ -104,7 +104,7 @@ if event:
 | `@a2ui/markdown-it` | `0.2.2`, exact. Its peer range (`web_core ^0.14.0`) is wrong for 0.15, so `package.json` carries a scoped npm `overrides` entry pointing it at the root `web_core`. Remove when upstream fixes it |
 | `dompurify` (inside `@a2ui/markdown-it`) | `3.4.18`, exact, via a scoped npm `overrides` entry (ADR-008). Upstream pins 3.4.11, which has open advisories fixed by 3.4.17. Remove when upstream ships a fix |
 | `zod` | 3.x required by `web_core`; open high advisory with no 3.x fix. Accepted residual risk (ADR-008) |
-| Streamlit | develop on 1.67.x; declare `streamlit>=1.59`, the lowest release CI passes (M2: 1.51–1.58 fail, see `docs/m2-report.md`) |
+| Streamlit | develop on 1.67.x; declare `streamlit>=1.59`, the lowest release CI passes (M2: 1.51–1.58 fail, see `docs/history/m2-report.md`) |
 | Node | 24 (via nvm if the system Node is older) |
 | React | 18 or 19 (peer range of `@a2ui/react`); use what the template ships |
 | Basic catalog ID | `https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json` |
@@ -124,7 +124,7 @@ API notes that are easy to get wrong:
 - `@a2ui/web_core` 0.15.0 rejects unknown component types only when the processor has a `validationConfig`. `session.ts` passes `VALIDATION` (`RELAXED_VALIDATION` with `allowUnknownElements: false`): relaxed so surfaces can stream in out of order, strict about types. Never pass `STRICT_VALIDATION`: it rejects a surface whose root has not arrived yet. A `Text` without `text`, or an unknown component type, is a reliable invalid message for tests.
 - The production build sets `dropConsole: true` (template default). The one `console.warn` we keep goes through a reference bound in `session.ts`, which the minifier leaves alone.
 - The component is registered on first call, not at import: Streamlit resolves `asset_dir` only once its runtime has started, so import-time registration breaks `import streamlit_a2ui` outside `streamlit run`.
-- A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/notes-m1.md`).
+- A trigger fired inside `@st.fragment` reruns only the fragment; the returned message is visible only there (`docs/history/notes-m1.md`).
 - The published README still shows v0.9 examples. Trust `node_modules/@a2ui/*/` type definitions and CHANGELOG over blog posts or memory; these packages had breaking changes in 0.13, 0.14 and 0.15.
 - 1.0 wire format differs from 0.9: dynamic values use `@path`, `@call`, `@index`; naming is renderer/agent. The envelope is `{"version":"1.0","createSurface":{...}}`. Take sample payloads from the 1.0 spec (`node_modules/@a2ui/web_core/src/v1_0/schemas/`, including `catalogs/basic/examples/`), not from older tutorials.
 
@@ -189,13 +189,9 @@ SECURITY.md                private reporting route; points at docs/security.md
 docs/architecture.md       current design, short
 docs/adr/                  NNNN-title.md
 docs/security.md           security model, overrides, residual risks, npm audit
-docs/notes-m1.md           fragment trigger scope; page-wide color-scheme check
-docs/spike-report.md       written at the end of M0
-docs/m1-report.md          written at the end of M1
-docs/m2-report.md          written at the end of M2
-docs/handoff-m1.md … -m4.md  one handoff per milestone: decisions, steps, acceptance criteria
-docs/m3-report.md          written at the end of M3
-docs/history/              M4 moves the handoffs, reports, findings.md and notes-m1.md here (handoff-m4, step b)
+docs/history/              milestone record: README.md (index), handoff-m1 … -m4, spike-report,
+                           m1- … m4-report, findings.md (M0 evidence), notes-m1.md (fragment
+                           trigger scope; page-wide color-scheme check), m4-drafts.md
 docs/release-plan.md       milestones to 0.1.0
 docs/testing-playbook.md   manual and automated test steps
 docs/upstream-issues.md    drafts of issues to file upstream

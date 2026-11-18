@@ -92,7 +92,7 @@ Stop the first app (Ctrl+C), then:
 | # | Do | Expected |
 |---|---|---|
 | R1 | With an example open, rebuild the frontend (`npm run build`) and restart Streamlit **without** reloading the tab | The component shows "Another build of streamlit-a2ui is already loaded on this page. Reload the page." Reloading fixes it. No blank component, no uncaught exception |
-| R2 | In the basic example, click **Send** twice very fast | Record how many actions arrive. A second action can replace the first (known, unmeasured; see the M3 item in `docs/release-plan.md`). Do not file it as a new bug |
+| R2 | In the basic example, click **Send** twice very fast | Record how many actions arrive. A second action replaces the first (known: in M3 a double or triple click returned one action; see the README Limitations). Do not file it as a new bug |
 | R3 | Open the page in a second browser (Firefox or Safari) and repeat B1–B5 | Same results. Record the browser; M1 checked only a Chromium-based one |
 
 ## 6. Clean clone (criterion 1, about 10 minutes)
