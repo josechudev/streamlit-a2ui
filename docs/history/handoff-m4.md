@@ -1,12 +1,12 @@
 # Handoff: M4 — 0.1.0 public
 
-Written 2026-11-18, from the M4 section of `docs/release-plan.md` and the open problems at the end of `docs/m3-report.md`.
+Written 2026-11-18, from the M4 section of `docs/release-plan.md` and the open problems at the end of `docs/history/m3-report.md`.
 
 ## Context
 
 `streamlit-a2ui` renders Google's A2UI 1.0 protocol in Streamlit by wrapping the official web renderer (`@a2ui/react` + `@a2ui/web_core` 0.15.0) in a Streamlit Components v2 component.
 
-- **M3 is merged** (PRs #10–#15; `master` at `9cc0a23`). All eight M3 criteria pass (`docs/m3-report.md`).
+- **M3 is merged** (PRs #10–#15; `master` at `9cc0a23`). All eight M3 criteria pass (`docs/history/m3-report.md`).
 - **`0.1.0rc1` is on PyPI,** published by `release.yml` from the annotated tag `v0.1.0rc1` on `388f2a7` (release run 44248941528). The owner pushed the tag and approved the `pypi` environment. Files match the run's artifact; PEP 740 attestations name this repository, `release.yml` and `pypi`. PyPI's Trusted Publisher is now an active publisher, no longer a pending one.
 - **A real ADK agent drove a surface** (action round trip and streamed response) with no package bugs. The checked-in examples stay hand-written.
 - **Already done for M4:**
@@ -20,7 +20,7 @@ Written 2026-11-18, from the M4 section of `docs/release-plan.md` and the open p
 
 M4 publishes `0.1.0`, gets the package listed, and lets people know. It adds no features.
 
-Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/m3-report.md` (especially "Wrong in the handoff, `CLAUDE.md` or the release plan" and "Open problems and suggested next steps for M4"), `CONTRIBUTING.md` (release process), `CHANGELOG.md`, `README.md` and `docs/testing-playbook.md`. Where this file and `CLAUDE.md` disagree, this file wins, and `CLAUDE.md` is brought in line.
+Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/history/m3-report.md` (especially "Wrong in the handoff, `CLAUDE.md` or the release plan" and "Open problems and suggested next steps for M4"), `CONTRIBUTING.md` (release process), `CHANGELOG.md`, `README.md` and `docs/testing-playbook.md`. Where this file and `CLAUDE.md` disagree, this file wins, and `CLAUDE.md` is brought in line.
 
 ## Decisions (treat as settled)
 
@@ -31,7 +31,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/m3-rep
 - **A published version is final.** PyPI never accepts the same file name twice. A problem found after the upload is fixed in `0.1.1`.
 - **The README is frozen per version on PyPI.** Everything the `0.1.0` page should say lands before the tag.
 - **Files linked from the `0.1.0rc1` README stay where they are:** `README.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `CHANGELOG.md`, `LICENSE`, `docs/security.md`, `docs/testing-playbook.md`, `docs/architecture.md`, `docs/adr/`, `docs/images/basic-example.gif`, `examples/basic_app.py` and `examples/streaming_app.py`. The rc1 page links them on `master` and can never be changed.
-- **Milestone history moves to `docs/history/`:** the handoffs (`handoff-m1.md` … `handoff-m4.md`), the reports (`spike-report.md`, `m1-report.md` … `m3-report.md`), `findings.md` (M0 evidence) and `notes-m1.md`. `docs/m4-report.md` is written there directly, as `docs/history/m4-report.md`. Current documents (`architecture.md`, `security.md`, `release-plan.md`, `testing-playbook.md`, `upstream-issues.md`, `adr/`, `images/`) stay in `docs/`.
+- **Milestone history moves to `docs/history/`:** the handoffs (`handoff-m1.md` … `handoff-m4.md`), the reports (`spike-report.md`, `m1-report.md` … `m3-report.md`), `findings.md` (M0 evidence) and `notes-m1.md`. The M4 report is written there directly, as `docs/history/m4-report.md`. Current documents (`architecture.md`, `security.md`, `release-plan.md`, `testing-playbook.md`, `upstream-issues.md`, `adr/`, `images/`) stay in `docs/`.
 - **The command list lives in `CONTRIBUTING.md`.** `CLAUDE.md` points to it and keeps only what is specific to Claude Code (the local Node path, the setuptools cache, subagents).
 - **The watch week fixes bugs only,** each with a test, released as `0.1.x` through the same tag-and-approve route. Feature requests go to the backlog in `docs/release-plan.md`.
 - **Pending owner decisions,** asked at the start of M4 and recorded in the report:

@@ -1,6 +1,6 @@
 # M1 report: harden the spike into v0.1
 
-Date: 2026-11-17. Branch `m1-v0.1`, created from `m0-spike`, 18 commits, not pushed. Browser checks ran in the Chromium-based browser pane of the Claude desktop app, on macOS, with the DOM and console inspected directly. The handoff is in `docs/handoff-m1.md`.
+Date: 2026-11-17. Branch `m1-v0.1`, created from `m0-spike`, 18 commits, not pushed. Browser checks ran in the Chromium-based browser pane of the Claude desktop app, on macOS, with the DOM and console inspected directly. The handoff is in `docs/history/handoff-m1.md`.
 
 ## Acceptance criteria
 
@@ -14,7 +14,7 @@ Date: 2026-11-17. Branch `m1-v0.1`, created from `m0-spike`, 18 commits, not pus
 | 6 | One `dompurify` 3.4.18 in lockfile and bundle | **Pass** | `npm ls dompurify` → `dompurify@3.4.18 overridden`, single copy. `package-lock.json` resolves `node_modules/dompurify` to 3.4.18 (the `3.4.11` string left in it is `@a2ui/markdown-it`'s declared dependency). The bundle contains DOMPurify's `t.version = "3.4.18"` |
 | 7 | Wheel has no source maps or CDN references; no construction log | **Pass** | pytest builds the wheel with `uv build` and asserts: no `*.map`, no `sourceMappingURL=`, no URL that would load remote scripts, stylesheets or fonts (the pattern is itself tested against positive and negative samples). `npm run build` fails if `build/` holds source maps (checked by planting a `.map` file: exit 1). `grep` finds no "MessageProcessor constructed" in the bundle |
 | 8 | Tests and linters pass; 2, 3, 4 exercised in a browser | **Pass** | Vitest 9 passed, pytest 17 passed, `tsc --noEmit` clean, `ruff check` and `ruff format --check` clean, Prettier clean. No `any`, `@ts-` or `dangerouslySetInnerHTML` in our code. Criteria 2–4 as above |
-| 9 | Docs exist and agree | **Pass** | `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/0001`–`0009`, `docs/notes-m1.md` and this report. The ADRs are named `NNNN-title.md` per `CLAUDE.md`, not `001`–`009` as the handoff lists them |
+| 9 | Docs exist and agree | **Pass** | `CLAUDE.md`, `README.md`, `docs/security.md`, `docs/adr/0001`–`0009`, `docs/history/notes-m1.md` and this report. The ADRs are named `NNNN-title.md` per `CLAUDE.md`, not `001`–`009` as the handoff lists them |
 
 ## What the step-4 review changed, and why
 
@@ -92,7 +92,7 @@ None of the 32 production npm dependencies ships a `NOTICE` file, so Apache-2.0 
 ## Not done or not verified
 
 - Light/dark switching (M0 criterion 5) was not re-run as a toggle; the dark and light themes were each checked on fresh loads, including the error notice.
-- The `color-scheme` check (`docs/notes-m1.md`) covers one Chromium-based browser on macOS with overlay scrollbars.
+- The `color-scheme` check (`docs/history/notes-m1.md`) covers one Chromium-based browser on macOS with overlay scrollbars.
 - `.claude/launch.json` (local preview configs) is untracked and was not committed.
 
 ## Open problems and suggested next steps

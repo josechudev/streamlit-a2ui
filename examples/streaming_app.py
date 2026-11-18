@@ -15,7 +15,7 @@ shipped with ``@a2ui/web_core`` 0.15.0
 A trigger fired by a component inside a fragment reruns only that fragment,
 so the returned message is visible only inside it. The action is therefore
 handled inside the fragment, and ``st.rerun(scope="app")`` is used when the
-rest of the page has to change (see docs/notes-m1.md).
+rest of the page has to change (see docs/history/notes-m1.md).
 """
 
 from __future__ import annotations
