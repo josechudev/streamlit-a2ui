@@ -32,8 +32,8 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "examples" / "basic_app.py"
 STARTUP_SECONDS = 60
 TIMEOUT_MS = 20_000
-# The first script run in a fresh venv imports Streamlit's dependencies for
-# the first time (pandas, pyarrow), which can take well over 20 s.
+# Generous for a cold CI runner. The first render no longer waits for pandas
+# and pyarrow to import (fixed in 0.1.0; tests/test_component.py guards it).
 FIRST_RENDER_MS = 90_000
 
 

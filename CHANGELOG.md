@@ -2,6 +2,12 @@
 
 All notable changes to this project are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [semantic versioning](https://semver.org/) with PEP 440 version numbers.
 
+## [Unreleased]
+
+### Fixed
+
+- The first page load in a new environment no longer waits 20 seconds or more for the surface. Streamlit's check for dataframes in the component's data imported pandas and pyarrow on the first call; the message log is now passed in a form the check skips. Measured on macOS with Streamlit 1.67: from about 23 seconds to under 2 seconds for the first surface after a fresh install.
+
 ## [0.1.0rc1] - 2026-11-18
 
 The first release candidate, and the first release on PyPI (`pip install --pre streamlit-a2ui`). Pre-1.0: the API and the supported versions may change before 1.0. A2UI 1.0 only, with the official basic catalog. Requires Python 3.10 or newer and Streamlit 1.59 or newer.
