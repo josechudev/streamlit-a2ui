@@ -35,7 +35,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/m3-rep
 - **The command list lives in `CONTRIBUTING.md`.** `CLAUDE.md` points to it and keeps only what is specific to Claude Code (the local Node path, the setuptools cache, subagents).
 - **The watch week fixes bugs only,** each with a test, released as `0.1.x` through the same tag-and-approve route. Feature requests go to the backlog in `docs/release-plan.md`.
 - **Pending owner decisions,** asked at the start of M4 and recorded in the report:
-  1. **ADK example in the repository** (`examples/adk_agent_app.py`). The M3 report recommends **no** for `0.1.0`: it needs an API key, model availability changed by the hour during the check, and the agent glue is the app's code. No ADK example is added unless the owner approves it.
+  1. **ADK example.** *Decided by the owner on 2026-11-18:* no ADK example in this repository. After `0.1.0`, a separate example repository (owned and created by the owner, built from the M3 scratch app without its `.env`) may show one, and the README may link it then. Not part of M4. Reasons: it needs an API key that this repository's CI never has, model availability changed by the hour during the M3 check, and the agent glue is the app's code.
   2. **Google CLA.** The A2UI listing pull request needs the owner to have signed Google's Contributor License Agreement as an individual. The owner decides and signs; nothing employer-related goes into it.
   3. **GitHub release assets.** *Decided by the owner on 2026-11-18:* no assets; the notes link the PyPI page and the release run, so PyPI stays the one source of files.
 
@@ -160,7 +160,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
 
 - Pushing tags, uploading to PyPI or TestPyPI, `twine upload`, `uv publish`, creating GitHub releases, opening pull requests in other repositories, posting on the forum or GitHub Discussions, or running `release.yml` other than a dry run the owner asks for — unless the owner explicitly asks for that action in the session.
 - Signing the Google CLA or any other agreement for the owner.
-- An ADK or other agent example in the repository without the owner's approval; any agent adapter, streaming helper, message parser or typed Python message models.
+- An ADK or other agent example in this repository (decided: none), or the separate example repository (after `0.1.0`); any agent adapter, streaming helper, message parser or typed Python message models.
 - Backlog items: returning a list of messages (ADR-003, ADR-009), React 19, custom or geospatial catalogs, A2UI 0.9.x or 0.8, persisting form state across remounts.
 - Upgrading `@a2ui/*`, `dompurify` or React, or dropping an override, even if upstream ships a fix during M4 (record it for after 0.1.0).
 - Changing the repository's visibility, settings, rulesets or environments.

@@ -44,7 +44,7 @@ Handoff: `docs/handoff-m3.md`. Result: `docs/m3-report.md`. The handoff moves th
 - **README pass:** a GIF of the basic example, install from PyPI, status badge text that says pre-1.0. *Done, before the tag.*
 
 ### M4 — 0.1.0 public
-Handoff: `docs/handoff-m4.md`. It adds, before the tag, a check of M3's first-load delay and a repository tidy-up (history to `docs/history/`, the command list to `CONTRIBUTING.md`), and asks the owner to decide on the ADK example (decision 3 below).
+Handoff: `docs/handoff-m4.md`. It adds, before the tag, a check of M3's first-load delay and a repository tidy-up (history to `docs/history/`, the command list to `CONTRIBUTING.md`), and records the owner's decision on the ADK example (decision 3 below).
 
 - ~~Flip the repo to public.~~ *Done early, at the start of M3: GitHub Free has no environment reviewers on private repositories, and the `pypi` environment needs one. A full-history scan for secrets and employer data was clean first.*
 - Tag `v0.1.0`; GitHub release notes from `CHANGELOG.md`, stating A2UI 1.0 only, the Streamlit floor, the known risks, and the pinned 0.x renderer packages.
@@ -57,7 +57,7 @@ Handoff: `docs/handoff-m4.md`. It adds, before the tag, a check of M3's first-lo
 ## Decisions to make along the way
 1. **Release on the 0.x renderer packages or wait for a 1.0-aligned `@a2ui/react`?** Recommendation: release; pins and overrides are documented, and waiting has no end date. When upstream ships, that is `0.1.x` or `0.2.0` depending on breakage.
 2. **Streamlit floor:** decided by M2 CI, not by us. *Decided: `>=1.59`.*
-3. **Ship an ADK example in the repo?** Decide after M3's real-agent check.
+3. **Ship an ADK example in the repo?** *Decided 2026-11-18: no.* It needs an API key CI never has, and the agent glue is the app's code. After `0.1.0`, a separate example repository (the owner's) may show one, linked from the README.
 4. **Org or personal GitHub account** for the public repo. Personal is fine for 0.1; transferring later keeps redirects.
 
 ## After 0.1.0 (backlog, not milestones)
