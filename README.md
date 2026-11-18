@@ -4,9 +4,9 @@
 
 Render [A2UI](https://a2ui.org) surfaces inside Streamlit apps.
 
-![The basic example: a contact form rendered from A2UI messages, filled in and sent; the agent's reply updates the form and the returned action is shown below it](https://raw.githubusercontent.com/josechudev/streamlit-a2ui/master/docs/images/basic-example.gif)
+![A chat in which a Gemini model writes the UI: asked for a card, it sends a Card; asked for a form to book a table, it sends a form whose Confirm Booking button goes back to the model, which answers with a confirmation](https://raw.githubusercontent.com/josechudev/streamlit-a2ui/master/docs/images/chat-demo.gif)
 
-*The form is an A2UI surface, drawn from the agent's messages by the official renderer. Press Send and `a2ui_surface` returns the action to Python (the JSON below); the scripted agent's reply updates the form in place.*
+*A real model writes the UI: each reply is A2UI JSON from a Gemini agent (Google ADK with `a2ui-agent-sdk`), drawn by `streamlit-a2ui` as real components, and the form's button goes back to the agent. The code is in [streamlit-a2ui-examples](https://github.com/josechudev/streamlit-a2ui-examples).*
 
 A2UI is a protocol in which an agent describes a user interface as JSON messages and a renderer draws it with a trusted catalog of components. `streamlit-a2ui` wraps the official web renderer (`@a2ui/react` and `@a2ui/web_core`) in a Streamlit Components v2 component. You pass it the agent's messages; it draws the surface, and it returns the user's actions so you can send them back to the agent.
 
@@ -49,6 +49,10 @@ uv pip install -e .
 `npm run build` writes the frontend bundle into `streamlit_a2ui/frontend/build/` and generates `streamlit_a2ui/renderer_capabilities.json` and `streamlit_a2ui/THIRD_PARTY_LICENSES.txt`. Build it before installing, and again after changing the frontend. To build a wheel, run `uv build` after `npm run build`.
 
 ## Quickstart
+
+![The basic example: a contact form rendered from A2UI messages, filled in and sent; the agent's reply updates the form and the returned action is shown below it](https://raw.githubusercontent.com/josechudev/streamlit-a2ui/master/docs/images/basic-example.gif)
+
+*The form is an A2UI surface, drawn from the agent's messages by the official renderer. Press Send and `a2ui_surface` returns the action to Python (the JSON below); the scripted agent's reply updates the form in place.*
 
 Keep the agent's messages in an append-only list in `st.session_state`, pass the whole list on every run, and forward whatever comes back to your agent. This is a shortened [`examples/basic_app.py`](https://github.com/josechudev/streamlit-a2ui/blob/master/examples/basic_app.py), with a scripted function in place of a real agent:
 
@@ -166,6 +170,8 @@ An action fired from a component inside a fragment reruns only that fragment, an
 Do not change the key to force a repaint: a new key mounts a new component and loses its state.
 
 ## Using it with a real agent
+
+A complete chat app with a Gemini agent is in [streamlit-a2ui-examples](https://github.com/josechudev/streamlit-a2ui-examples) (it needs a Google API key). In short:
 
 The package draws what an agent sends and returns what the user does; connecting the agent is your app's code. Pass `renderer_capabilities()` to the agent (with Google's [`a2ui-agent-sdk`](https://pypi.org/project/a2ui-agent-sdk/), under the `a2uiRendererCapabilities` key), run the agent's stream in a background thread or task that only appends complete A2UI messages to the log list, and draw the log with `a2ui_surface` inside `@st.fragment(run_every=...)` as above. Never call `st.*` from that thread. Send each message `a2ui_surface` returns back to the agent. This was checked with a minimal Google ADK agent built on `a2ui-agent-sdk` 0.12.0: an action round trip and a streamed response worked unchanged.
 
