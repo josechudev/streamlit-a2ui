@@ -2,19 +2,87 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
+    branches: [master]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
 
+env:
+  # One place for the Playwright pin: the pip installs and the browser cache
+  # key both use it, so a bump also refreshes the cached Chromium.
+  PLAYWRIGHT_VERSION: "1.65.2"
+
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A new push to a pull request cancels its older run; runs on master all finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Decide what the change touches, so a docs-only change skips the build.
+  # The four required checks still report: `test` runs with its steps skipped
+  # (a skipped matrix job would report one unexpanded name and block the
+  # merge), and skipped `package` and `wheel-smoke` jobs count as passing.
+  changes:
+    name: Detect changes
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+      readme: ${{ steps.classify.outputs.readme }}
+    steps:
+      - name: List changed files and classify them
+        id: classify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          # The default shell stops on the first error; a failed lookup must
+          # fall through to "run everything" instead.
+          set +e
+          files="$RUNNER_TEMP/changed.txt"
+          if [ "$EVENT" = pull_request ]; then
+            gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[].filename' > "$files"
+          else
+            gh api "repos/$REPO/compare/$BEFORE...$AFTER" --jq '.files[].filename' > "$files"
+          fi
+          ok=$?
+          set -e
+          code=false
+          readme=false
+          # Anything not listed here counts as code. If the list could not be
+          # read, or is empty, run everything.
+          if [ "$ok" -ne 0 ] || [ ! -s "$files" ]; then
+            echo "could not list changed files; running everything"
+            code=true
+          else
+            while IFS= read -r f; do
+              case "$f" in
+                README.md) readme=true ;;  # the package's long description: twine checks it
+                docs/* | *.md | .github/dependabot.yml) ;;
+                *) code=true ;;
+              esac
+            done < "$files"
+          fi
+          sed 's/^/  /' "$files"
+          echo "code=$code readme=$readme"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "readme=$readme" >> "$GITHUB_OUTPUT"
+
   test:
     name: Test (${{ matrix.name }})
+    needs: changes
+    # Draft PRs wait until they are marked ready.
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -33,54 +101,86 @@ jobs:
       # Not STREAMLIT_*: Streamlit reads STREAMLIT_<OPTION> variables as CLI
       # options, so STREAMLIT_VERSION would be parsed as `streamlit --version`.
       PIN_STREAMLIT: ${{ matrix.streamlit }}
+      CODE: ${{ needs.changes.outputs.code }}
+    # Every step below is skipped for a docs-only change (see `changes`).
     steps:
+      - name: Docs-only change, nothing to test
+        if: env.CODE != 'true'
+        run: echo "No code changed; the build and tests are skipped."
+
       # Third-party actions are pinned to a commit; the comment names the release.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.CODE == 'true'
         with:
           persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: env.CODE == 'true'
         with:
           node-version: "24"
           cache: npm
           cache-dependency-path: streamlit_a2ui/frontend/package-lock.json
 
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        if: env.CODE == 'true'
 
       - name: "Frontend: install"
+        if: env.CODE == 'true'
         working-directory: streamlit_a2ui/frontend
         run: npm ci
 
       - name: "Frontend: format check"
+        if: env.CODE == 'true'
         working-directory: streamlit_a2ui/frontend
         run: npm run format:check
 
       # clean + typecheck + vite build + source-map check + capabilities + licenses
       - name: "Frontend: build"
+        if: env.CODE == 'true'
         working-directory: streamlit_a2ui/frontend
         run: npm run build
 
       - name: "Frontend: unit tests"
+        if: env.CODE == 'true'
         working-directory: streamlit_a2ui/frontend
         run: npm test
 
       - name: "Python: install"
+        if: env.CODE == 'true'
         run: |
           uv venv --python "$PYTHON_VERSION"
           uv pip install -e . "$PIN_STREAMLIT" \
-            "pytest==9.2.0" "ruff==0.17.5" "pytest-playwright==0.10.0" "playwright==1.65.2"
+            "pytest==9.2.0" "ruff==0.17.5" "pytest-playwright==0.10.0" "playwright==$PLAYWRIGHT_VERSION"
 
       - name: "Python: lint"
+        if: env.CODE == 'true'
         run: .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
       # Includes the wheel checks: builds the wheel with uv and inspects it.
       - name: "Python: tests"
+        if: env.CODE == 'true'
         run: .venv/bin/pytest -q
 
+      # The browser download is cached; the system libraries it needs are not
+      # (apt), so a cache hit still installs those.
+      - name: "Browser: restore Chromium"
+        id: chromium
+        if: env.CODE == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
       - name: "Browser: install Chromium"
+        if: env.CODE == 'true' && steps.chromium.outputs.cache-hit != 'true'
         run: .venv/bin/playwright install --with-deps chromium
 
+      - name: "Browser: install Chromium's system libraries"
+        if: env.CODE == 'true' && steps.chromium.outputs.cache-hit == 'true'
+        run: .venv/bin/playwright install-deps chromium
+
       - name: "Browser: smoke test"
+        if: env.CODE == 'true'
         run: .venv/bin/pytest e2e -q --tracing retain-on-failure --output e2e-results
 
       - name: "Browser: upload trace on failure"
@@ -96,6 +196,12 @@ jobs:
   # exact files rather than rebuilding them.
   package:
     name: Build wheel and sdist
+    needs: changes
+    # README.md is the package's long description, so a README change still
+    # builds and runs `twine check`.
+    if: >-
+      github.event.pull_request.draft != true &&
+      (needs.changes.outputs.code == 'true' || needs.changes.outputs.readme == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -153,7 +259,8 @@ jobs:
   # against it. The checkout is only a source of e2e/ and examples/.
   wheel-smoke:
     name: Installed wheel smoke test
-    needs: package
+    needs: [changes, package]
+    if: github.event.pull_request.draft != true && needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -174,7 +281,7 @@ jobs:
           uv venv --python 3.13 "$RUNNER_TEMP/wheel-venv"
           uv pip install --python "$RUNNER_TEMP/wheel-venv" \
             "$RUNNER_TEMP"/dist/*.whl \
-            "pytest==9.2.0" "pytest-playwright==0.10.0" "playwright==1.65.2"
+            "pytest==9.2.0" "pytest-playwright==0.10.0" "playwright==$PLAYWRIGHT_VERSION"
 
       # From outside the checkout, so the source tree cannot be imported.
       - name: "Wheel: import and call renderer_capabilities()"
@@ -195,8 +302,20 @@ jobs:
           print(streamlit_a2ui.renderer_capabilities())
           '
 
+      - name: "Browser: restore Chromium"
+        id: chromium
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
       - name: "Browser: install Chromium"
+        if: steps.chromium.outputs.cache-hit != 'true'
         run: $RUNNER_TEMP/wheel-venv/bin/playwright install --with-deps chromium
+
+      - name: "Browser: install Chromium's system libraries"
+        if: steps.chromium.outputs.cache-hit == 'true'
+        run: $RUNNER_TEMP/wheel-venv/bin/playwright install-deps chromium
 
       # The test starts Streamlit from a temporary directory, so only the
       # installed wheel provides streamlit_a2ui.
