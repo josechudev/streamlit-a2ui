@@ -260,6 +260,19 @@ If a `js=`/`css=` glob matches more than one file in `build/`, run `npm run clea
 - Commits: small, imperative subject, one concern each.
 - Decisions: any change to the Architecture or Security sections needs `docs/adr/NNNN-title.md` with Context, Options, Decision, Consequences, and the owner's approval first. Accepted so far: 001 wrap official renderer · 002 Components v2 frameless · 003 message-pipe API · 004 log as source of truth · 005 A2UI 1.0 only · 006 basic catalog only · 007 streaming across reruns · 008 dependency overrides · 009 renderer errors stay in the browser. One file per ADR in `docs/adr/`.
 
+## Subagents (local, optional)
+
+The owner's machine has four project subagents in `.claude/agents/` of the main checkout. `.claude/` is local and never committed, so other contributors don't have them. Use them only when the owner asks for subagents; otherwise do the work inline.
+
+| Agent | Model | Use for |
+|---|---|---|
+| `tester` | sonnet | Run checks and report exact failures: npm typecheck, Vitest, Prettier, build, pytest, ruff, e2e, wheel and sdist. Never edits code |
+| `ts-dev` | sonnet | Any change under `streamlit_a2ui/frontend` (glue, tests, build config, theme CSS) |
+| `python-dev` | sonnet | Packaging, workflows, release, pytest design: work that needs investigation |
+| `python-dev-quick` | haiku | Small, fully specified Python or metadata edits in one or two files; no frontend |
+
+Give a subagent the exact files, the change and the acceptance check. Review its diff and rerun the checks yourself before reporting a result.
+
 ## Out of scope — refuse or ask first
 
 Geospatial or any custom catalog · agent adapters (ADK, LangChain, A2A, AG-UI) · A2UI 0.9.x/0.8 · persisting in-surface form state across remounts · typed message models in Python · multiple outbound triggers · a v1/iframe fallback · sending errors to Python or changing the return type · a streaming helper function · a docs site · publishing by any route other than `release.yml` on a `v*` tag the owner pushes and approves: Claude Code never creates or pushes tags, never uploads to PyPI, TestPyPI or npm, never runs `twine upload` or `uv publish`, never creates GitHub releases · running `release.yml` other than as a `workflow_dispatch` dry run the owner starts or asks for · `0.1.0`, the GitHub release, gallery listings and posts (M4) · changing the repository's visibility, settings, rulesets or environments (the owner's) · an agent or ADK example in this repository without the owner's approval after M3's real-agent check (the check itself runs in a scratch folder outside the repository) · upgrading `@a2ui/*`, `dompurify` or React · filing upstream issues (the owner does) · coverage badges, a multi-OS matrix, pre-commit frameworks, release automation beyond tag-to-publish · pushing or opening a pull request unless the owner asks.
