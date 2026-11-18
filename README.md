@@ -1,10 +1,12 @@
 # streamlit-a2ui
 
-![Status: pre-1.0 release candidate](https://img.shields.io/badge/status-pre--1.0%20release%20candidate-orange)
+![Status: pre-1.0](https://img.shields.io/badge/status-pre--1.0-orange)
 
 Render [A2UI](https://a2ui.org) surfaces inside Streamlit apps.
 
 ![The basic example: a contact form rendered from A2UI messages, filled in and sent; the agent's reply updates the form and the returned action is shown below it](https://raw.githubusercontent.com/josechudev/streamlit-a2ui/master/docs/images/basic-example.gif)
+
+*The form is an A2UI surface, drawn from the agent's messages by the official renderer. Press Send and `a2ui_surface` returns the action to Python (the JSON below); the scripted agent's reply updates the form in place.*
 
 A2UI is a protocol in which an agent describes a user interface as JSON messages and a renderer draws it with a trusted catalog of components. `streamlit-a2ui` wraps the official web renderer (`@a2ui/react` and `@a2ui/web_core`) in a Streamlit Components v2 component. You pass it the agent's messages; it draws the surface, and it returns the user's actions so you can send them back to the agent.
 
@@ -12,7 +14,7 @@ It is for Python developers who already have an agent that speaks A2UI, or want 
 
 ## Status
 
-Pre-1.0. `0.1.0rc1` is the first release candidate: try it and report problems, but expect the API and the supported versions to change before 1.0.
+Pre-1.0. `0.1.0` is the first release: try it and report problems, but expect the API and the supported versions to change before 1.0.
 
 - A2UI **1.0** only, with the official basic catalog. 0.9.x and 0.8 are not supported.
 - Streamlit >= 1.59 (Components v2). CI runs the floor (1.59) and the latest release; developed on 1.67.
@@ -22,10 +24,10 @@ Pre-1.0. `0.1.0rc1` is the first release candidate: try it and report problems, 
 ## Install
 
 ```bash
-pip install --pre streamlit-a2ui
+pip install streamlit-a2ui
 ```
 
-`0.1.0rc1` is a pre-release. While no final release exists, pip and uv install it even without `--pre`; once `0.1.0` is out, a plain install picks the latest final release and you need `--pre` (pip), `--prerelease=allow` (uv) or an exact version (`streamlit-a2ui==0.1.0rc1`) to get a release candidate. The wheel contains the built frontend, so no Node is needed.
+This installs the latest final release. To try a release candidate, use `--pre` (pip), `--prerelease=allow` (uv) or an exact version. The wheel contains the built frontend, so no Node is needed.
 
 Then run the example: download [`examples/basic_app.py`](https://github.com/josechudev/streamlit-a2ui/blob/master/examples/basic_app.py) and run `streamlit run basic_app.py`.
 
