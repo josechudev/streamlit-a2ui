@@ -36,7 +36,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/m3-rep
 - **The watch week fixes bugs only,** each with a test, released as `0.1.x` through the same tag-and-approve route. Feature requests go to the backlog in `docs/release-plan.md`.
 - **Pending owner decisions,** asked at the start of M4 and recorded in the report:
   1. **ADK example.** *Decided by the owner on 2026-11-18:* no ADK example in this repository. After `0.1.0`, a separate example repository (owned and created by the owner, built from the M3 scratch app without its `.env`) may show one, and the README may link it then. Not part of M4. Reasons: it needs an API key that this repository's CI never has, model availability changed by the hour during the M3 check, and the agent glue is the app's code.
-  2. **Google CLA.** The A2UI listing pull request needs the owner to have signed Google's Contributor License Agreement as an individual. The owner decides and signs; nothing employer-related goes into it.
+  2. **Google CLA.** *Signed by the owner as an individual on 2026-11-18.* The A2UI listing pull request needs it. The CLA check matches the commit author's e-mail, so the listing commit must use the e-mail the owner signed with. Nothing employer-related goes into it.
   3. **GitHub release assets.** *Decided by the owner on 2026-11-18:* no assets; the notes link the PyPI page and the release run, so PyPI stays the one source of files.
 
 ## Steps
