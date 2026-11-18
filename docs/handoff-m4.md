@@ -37,7 +37,7 @@ Read these first: `CLAUDE.md`, `docs/release-plan.md` (M4 section), `docs/m3-rep
 - **Pending owner decisions,** asked at the start of M4 and recorded in the report:
   1. **ADK example in the repository** (`examples/adk_agent_app.py`). The M3 report recommends **no** for `0.1.0`: it needs an API key, model availability changed by the hour during the check, and the agent glue is the app's code. No ADK example is added unless the owner approves it.
   2. **Google CLA.** The A2UI listing pull request needs the owner to have signed Google's Contributor License Agreement as an individual. The owner decides and signs; nothing employer-related goes into it.
-  3. **GitHub release assets.** Recommendation: no assets, link the PyPI page and the release run instead, so PyPI stays the one source of files.
+  3. **GitHub release assets.** *Decided by the owner on 2026-11-18:* no assets; the notes link the PyPI page and the release run, so PyPI stays the one source of files.
 
 ## Steps
 
@@ -95,7 +95,7 @@ Work on a branch cut from `master`, in small commits with one concern each. `mas
     - links to the PyPI page, the release run and `docs/security.md`.
 
     Put the draft in `docs/history/m4-drafts.md`.
-12. **The owner creates the release,** for example `gh release create v0.1.0 --verify-tag --title "streamlit-a2ui 0.1.0" --notes-file <file>`, with no assets (pending decision 3). Claude Code runs it only if the owner explicitly asks in that session. Record the URL.
+12. **The owner creates the release,** for example `gh release create v0.1.0 --verify-tag --title "streamlit-a2ui 0.1.0" --notes-file <file>`, with no assets (decision 3). Claude Code runs it only if the owner explicitly asks in that session. Record the URL.
 
 ### (e) Listings
 

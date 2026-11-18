@@ -16,7 +16,7 @@ Push or open a pull request only when the owner asks. Work on a branch cut from 
 
 **Public actions.** Claude Code drafts the GitHub release notes, the listing pull requests and the posts; the owner creates, opens and publishes them. Claude Code creates a GitHub release, opens a pull request in another repository, or posts on the Streamlit forum or GitHub Discussions only when the owner explicitly asks for that action in the same session, and never signs an agreement (such as Google's CLA) for the owner.
 
-**Owner decisions pending at the start of M4:** whether an ADK example ships in the repository (the M3 report recommends not, for `0.1.0`; none is added without approval), signing Google's CLA for the A2UI listing, and whether the GitHub release carries assets (recommendation: no).
+**Owner decisions pending at the start of M4:** whether an ADK example ships in the repository (the M3 report recommends not, for `0.1.0`; none is added without approval), signing Google's CLA for the A2UI listing. Decided 2026-11-18: the GitHub release carries no assets.
 
 M4 publishes `0.1.0`, gets the package listed and announced, and adds no features. It passes when all eleven hold:
 
