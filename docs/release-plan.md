@@ -47,7 +47,7 @@ Handoff: `docs/history/handoff-m3.md`. Result: `docs/history/m3-report.md`. The 
 Handoff: `docs/history/handoff-m4.md`. It adds, before the tag, a check of M3's first-load delay and a repository tidy-up (history to `docs/history/`, the command list to `CONTRIBUTING.md`), and records the owner's decision on the ADK example (decision 3 below).
 
 - ~~Flip the repo to public.~~ *Done early, at the start of M3: GitHub Free has no environment reviewers on private repositories, and the `pypi` environment needs one. A full-history scan for secrets and employer data was clean first.*
-- Tag `v0.1.0`; GitHub release notes from `CHANGELOG.md`, stating A2UI 1.0 only, the Streamlit floor, the known risks, and the pinned 0.x renderer packages.
+- *Done 2026-11-18: `0.1.0` on PyPI from tag `v0.1.0` (release run 44356056432), with a fix for a 20-second first page load found while checking `0.1.0rc1`.* Tag `v0.1.0`; GitHub release notes from `CHANGELOG.md`, stating A2UI 1.0 only, the Streamlit floor, the known risks, and the pinned 0.x renderer packages.
 - **Listings:**
   - A2UI ecosystem renderers page: PR adding a row (platform: Streamlit / Python; v1.0 only). Check the current repo's contribution instructions; the listing has moved between repos before.
   - Streamlit component gallery: PR to `streamlit/gallery` component registry; add the `streamlit-component` topic to the repo.
