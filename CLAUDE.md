@@ -143,7 +143,7 @@ Claude Code never changes these settings; they are the owner's.
 | Security settings | private vulnerability reporting, secret scanning with push protection, Dependabot alerts and security updates, SHA pinning of actions required, read-only default workflow token, merged branches auto-deleted |
 | Topics | `a2ui`, `python`, `streamlit`, `streamlit-component` |
 | Dependabot | React, `react-dom` and their types grouped; React and `@types/node` majors held (React stays 18 until after 0.1.0); `@types/node` `^24`. The red "Dependabot Updates" runs for `zod` end in `security_update_not_possible`: expected, the accepted advisory in `docs/security.md` |
-| Tags, releases | `v0.1.0rc1` (annotated, on `388f2a7`), published to PyPI on 2026-11-18 by release run 44248941528. No GitHub release yet: the first is `v0.1.0`, in M4, created by the owner |
+| Tags, releases | `v0.1.0rc1` (annotated, on `388f2a7`), published to PyPI on 2026-11-18 by release run 44248941528. `v0.1.0` (annotated, on `cd164e4`, the `release/0.1.0` merge), published to PyPI on 2026-11-18 by release run 44356056432 after dry run 44355836918. No GitHub release yet: the first is `v0.1.0`, created by the owner |
 
 ## Security rules (non-negotiable)
 
