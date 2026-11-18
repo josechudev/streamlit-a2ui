@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # One place for the Playwright pin: the pip installs and the browser cache
+  # key both use it, so a bump also refreshes the cached Chromium.
+  PLAYWRIGHT_VERSION: "1.65.2"
+
 concurrency:
   group: ci-${{ github.ref }}
   # A new push to a pull request cancels its older run; runs on master all finish.
@@ -145,7 +150,7 @@ jobs:
         run: |
           uv venv --python "$PYTHON_VERSION"
           uv pip install -e . "$PIN_STREAMLIT" \
-            "pytest==9.2.0" "ruff==0.17.5" "pytest-playwright==0.10.0" "playwright==1.65.2"
+            "pytest==9.2.0" "ruff==0.17.5" "pytest-playwright==0.10.0" "playwright==$PLAYWRIGHT_VERSION"
 
       - name: "Python: lint"
         if: env.CODE == 'true'
@@ -156,9 +161,23 @@ jobs:
         if: env.CODE == 'true'
         run: .venv/bin/pytest -q
 
-      - name: "Browser: install Chromium"
+      # The browser download is cached; the system libraries it needs are not
+      # (apt), so a cache hit still installs those.
+      - name: "Browser: restore Chromium"
+        id: chromium
         if: env.CODE == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
+      - name: "Browser: install Chromium"
+        if: env.CODE == 'true' && steps.chromium.outputs.cache-hit != 'true'
         run: .venv/bin/playwright install --with-deps chromium
+
+      - name: "Browser: install Chromium's system libraries"
+        if: env.CODE == 'true' && steps.chromium.outputs.cache-hit == 'true'
+        run: .venv/bin/playwright install-deps chromium
 
       - name: "Browser: smoke test"
         if: env.CODE == 'true'
@@ -262,7 +281,7 @@ jobs:
           uv venv --python 3.13 "$RUNNER_TEMP/wheel-venv"
           uv pip install --python "$RUNNER_TEMP/wheel-venv" \
             "$RUNNER_TEMP"/dist/*.whl \
-            "pytest==9.2.0" "pytest-playwright==0.10.0" "playwright==1.65.2"
+            "pytest==9.2.0" "pytest-playwright==0.10.0" "playwright==$PLAYWRIGHT_VERSION"
 
       # From outside the checkout, so the source tree cannot be imported.
       - name: "Wheel: import and call renderer_capabilities()"
@@ -283,8 +302,20 @@ jobs:
           print(streamlit_a2ui.renderer_capabilities())
           '
 
+      - name: "Browser: restore Chromium"
+        id: chromium
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.PLAYWRIGHT_VERSION }}-chromium
+
       - name: "Browser: install Chromium"
+        if: steps.chromium.outputs.cache-hit != 'true'
         run: $RUNNER_TEMP/wheel-venv/bin/playwright install --with-deps chromium
+
+      - name: "Browser: install Chromium's system libraries"
+        if: steps.chromium.outputs.cache-hit == 'true'
+        run: $RUNNER_TEMP/wheel-venv/bin/playwright install-deps chromium
 
       # The test starts Streamlit from a temporary directory, so only the
       # installed wheel provides streamlit_a2ui.
