@@ -108,7 +108,7 @@ mkdir -p /tmp/a2ui-pypi-examples && git show v<version>:examples/basic_app.py > 
 
 ### CI
 
-`.github/workflows/ci.yml` runs all of the above on every pull request and on pushes to `master` and `develop`, with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`) and Python 3.13 with the latest Streamlit. A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check` and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the browser test against it. Keep the workflow and these commands in step. Third-party actions are pinned to a commit SHA.
+`.github/workflows/ci.yml` runs all of the above on every non-draft pull request and on pushes to `master` (not `develop`: the pull request already ran), with Node 24, on two legs: Python 3.10 with the Streamlit floor (`1.59.*`) and Python 3.13 with the latest Streamlit. A `package` job builds the wheel and sdist once, rebuilds the wheel from the sdist without Node and compares them, runs `twine check` and uploads `dist`; `wheel-smoke` installs that wheel into a fresh venv and runs the browser test against it. Keep the workflow and these commands in step. Third-party actions are pinned to a commit SHA.
 
 Before merging a change that affects rendering, or after upgrading Streamlit or any `@a2ui/*` package, follow [docs/testing-playbook.md](docs/testing-playbook.md), including the manual click-through of both examples.
 
